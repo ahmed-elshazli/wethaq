@@ -1,0 +1,33 @@
+{
+  "hero": {
+    "home": "Home",
+    "title": "Contact Us",
+    "tag": "Get in Touch"
+  },
+  "info": {
+    "tag": "Contact Information",
+    "addressTitle": "Address",
+    "phoneTitle": "Phone",
+    "emailTitle": "Email",
+    "hoursTitle": "Working Hours",
+    "hoursDays": "Sunday - Thursday",
+    "hoursTime": "9:00 AM - 5:00 PM",
+    "whatsappBtn": "WhatsApp",
+    "callBtn": "Call Now"
+  },
+  "form": {
+    "heading": "Send Us a Message",
+    "submitBtn": "Send Message",
+    "successTitle": "Sent Successfully!",
+    "successMsg": "Thank you for contacting us. We will get back to you shortly.",
+    "sendAnother": "Send Another Message",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Write your message here..."
+  },
+  "formFields": [
+    { "key": "name", "label": "Full Name", "type": "text", "placeholder": "Enter your name" },
+    { "key": "email", "label": "Email", "type": "email", "placeholder": "Enter your email" },
+    { "key": "phone", "label": "Phone Number", "type": "tel", "placeholder": "Enter your phone number" },
+    { "key": "subject", "label": "Subject", "type": "text", "placeholder": "Message subject" }
+  ]
+}

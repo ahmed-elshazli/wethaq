@@ -1,0 +1,12 @@
+{
+  "hero": {
+    "home": "Home",
+    "title": "Locations",
+    "tag": "Our Branches",
+    "subtitle": "Discover our branch locations across the Kingdom"
+  },
+  "actions": {
+    "openInMaps": "Open in Maps"
+  },
+  "mapPlaceholder": "Location Map"
+}

@@ -1,0 +1,51 @@
+{
+  "navItems": [
+    { "label": "Home", "path": "/" },
+    { "label": "About Us", "path": "/about" },
+    { "label": "Services", "path": "/services" },
+    { "label": "Team", "path": "/team" },
+    { "label": "Blog", "path": "/blog" },
+    { "label": "Locations", "path": "/locations" },
+    { "label": "Contact Us", "path": "/contact" }
+  ],
+  "header": {
+    "freeConsultation": "Free Consultation",
+    "bookConsultation": "Book Consultation",
+    "closeMenu": "Close",
+    "openMenu": "Menu"
+  },
+  "hero": {
+    "home": "Home"
+  },
+  "readMore": "Read More",
+  "footer": {
+    "description": "A professional firm combining deep legal expertise with contemporary practical vision, providing integrated legal services adhering to the highest standards of quality and professionalism.",
+    "ourServices": "Our Services",
+    "servicesList": [
+      "Legal Consultations",
+      "Litigation & Representation",
+      "Contract Drafting",
+      "Commercial Cases",
+      "Labor Cases",
+      "Arbitration"
+    ],
+    "quickLinksTitle": "Quick Links",
+    "quickLinks": [
+      { "label": "About Us", "path": "/about" },
+      { "label": "Team", "path": "/team" },
+      { "label": "Blog", "path": "/blog" },
+      { "label": "Locations", "path": "/locations" },
+      { "label": "Privacy Policy", "path": "/privacy" },
+      { "label": "Terms & Conditions", "path": "/terms" }
+    ],
+    "contactUs": "Contact Us",
+    "whatsapp": "WhatsApp",
+    "copyright": "© {{year}} Wethaq Al-Haq Law Firm. All rights reserved.",
+    "designedBy": "Designed & Developed by: Media Glow"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "message": "Sorry, the page you are looking for does not exist or has been moved.",
+    "backHome": "Back to Home"
+  }
+}

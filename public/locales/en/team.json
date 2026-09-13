@@ -1,0 +1,18 @@
+{
+  "hero": {
+    "home": "Home",
+    "title": "Our Team",
+    "subtitle": "A multidisciplinary team combining court litigation with corporate consultancy."
+  },
+  "labels": {
+    "mobile": "Mobile",
+    "email": "Email"
+  },
+  "cta": {
+    "tag": "Contact Us",
+    "heading": "Present Your Case to Our Team",
+    "desc": "Send a brief summary of your case and one of our lawyers will get back to you within one business day.",
+    "bookBtn": "Book a Legal Consultation",
+    "whatsapp": "WhatsApp"
+  }
+}

@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=Noto+Kufi+Arabic:wght@400;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --color-green-950: #111a11;
+  --color-green-900: #1a2a1a;
+  --color-green-800: #1e2b1e;
+  --color-green-700: #253325;
+  --color-green-600: #2d3d2d;
+  --color-green-500: #3a4e3a;
+  --color-gold-400: #c9a84c;
+  --color-gold-500: #b8962e;
+  --color-gold-600: #9a7d24;
+  --color-cream-100: #f5edd8;
+  --color-cream-200: #e8d8b8;
+  --color-cream-300: #d4bc94;
+  --color-cream-400: #b8a070;
+
+  --font-sans: 'IBM Plex Sans Arabic', sans-serif;
+}
+
+:root {
+  --bg: #1e2b1e;
+  --surface: #253325;
+  --surface-elevated: #2d3d2d;
+  --gold: #b8962e;
+  --gold-light: #c9a84c;
+  --cream: #e8d8b8;
+  --cream-light: #f5edd8;
+  --border-gold: rgba(184, 150, 46, 0.25);
+  --border-subtle: rgba(232, 216, 184, 0.1);
+}
+
+html {
+  scroll-behavior: smooth;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  background-color: var(--bg);
+  color: var(--cream);
+  font-feature-settings: 'kern' 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 3px;
+}
+
+::selection {
+  background: rgba(184, 150, 46, 0.3);
+  color: var(--cream-light);
+}
+
+.gold-line {
+  display: inline-block;
+  width: 48px;
+  height: 2px;
+  background: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  background: var(--gold);
+  color: #111a11;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s, transform 0.2s;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: var(--gold-light);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  text-decoration: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.btn-outline:hover {
+  background: rgba(184, 150, 46, 0.1);
+}
+
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: pageEnter 0.4s ease both;
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+[dir="ltr"] {
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+}
+
+/* Prevent horizontal overflow on all screens and fix white gaps */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+}

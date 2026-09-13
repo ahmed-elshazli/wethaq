@@ -1,0 +1,15 @@
+{
+  "hero": {
+    "home": "Home",
+    "title": "Blog",
+    "tag": "Legal Blog",
+    "subtitle": "Specialized legal articles and analysis from the Wethaq Al-Haq team"
+  },
+  "actions": {
+    "back": "Back to Blog",
+    "readArticle": "Read Article"
+  },
+  "article": {
+    "dummyText": "Article content will be added from the dashboard later."
+  }
+}

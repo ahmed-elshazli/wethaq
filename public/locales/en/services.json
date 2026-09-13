@@ -1,0 +1,16 @@
+{
+  "hero": {
+    "home": "Home",
+    "title": "Services",
+    "subtitle": "The firm is established to handle specialized and significant cases and consultations, organized into three specialized work units.",
+    "detailSubtitle": "The firm is established to handle specialized and significant cases and consultations, organized into three specialized work units."
+  },
+  "cta": {
+    "tag": "Need Legal Help?",
+    "heading": "Let Us Help With Your Case",
+    "desc": "Our team of lawyers and legal consultants is ready to provide the best legal solutions for your case.",
+    "btn": "Contact Us",
+    "needConsultation": "Need a Legal Consultation?",
+    "contactNow": "Contact Us Now"
+  }
+}

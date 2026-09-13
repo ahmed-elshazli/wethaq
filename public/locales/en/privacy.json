@@ -1,0 +1,10 @@
+{
+  "pageTitle": "Privacy Policy",
+  "sections": [
+    { "title": "Information Collection", "content": "We collect personal information that you voluntarily provide when contacting us or using our services, such as name, contact information, and case details." },
+    { "title": "Use of Information", "content": "We use your personal information to provide the requested legal services, communicate with you regarding your case, and improve our services." },
+    { "title": "Information Protection", "content": "We implement appropriate security measures to protect your personal information from unauthorized access, modification, disclosure, or destruction." },
+    { "title": "Information Sharing", "content": "We do not share your personal information with third parties except with your consent or when required by law." },
+    { "title": "Your Rights", "content": "You have the right to access, correct, or delete your personal data. You can contact us to exercise these rights." }
+  ]
+}

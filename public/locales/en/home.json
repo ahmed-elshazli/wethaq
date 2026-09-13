@@ -1,0 +1,26 @@
+{
+  "hero": {
+    "h1bPre": "",
+    "h1bHighlight": "Wethaq",
+    "h1bRest": " Is the Path to It"
+  },
+  "aboutBtn": "Read More",
+  "servicesTag": "Our Legal Services",
+  "servicesH": "Integrated Legal Solutions",
+  "servicesMore": "View All Services",
+  "readMore": "Read More",
+  "whyTag": "Why Us",
+  "whyH": "What Sets Wethaq Apart",
+  "why": [
+    { "title": "Specialized Legal Expertise", "desc": "An elite team of lawyers and consultants with high competencies across various legal fields." },
+    { "title": "Integrated Legal Solutions", "desc": "We meet the needs of individuals and businesses with a methodology tailored to each client." },
+    { "title": "Precision in Performance", "desc": "We adhere to the highest standards of quality and professionalism in every case we handle." },
+    { "title": "Trust-Based Partnership", "desc": "We build long-term professional relationships based on transparency and mutual trust." }
+  ],
+  "teamTag": "Our Team",
+  "teamH": "Elite Legal Professionals",
+  "teamBtn": "Meet the Full Team",
+  "blogTag": "Our Legal Blog",
+  "blogH": "Latest Articles & Analysis",
+  "blogBtn": "View All Articles"
+}

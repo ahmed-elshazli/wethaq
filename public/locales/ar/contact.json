@@ -1,0 +1,33 @@
+{
+  "hero": {
+    "home": "الرئيسية",
+    "title": "اتصل بنا",
+    "tag": "تواصل معنا"
+  },
+  "info": {
+    "tag": "معلومات التواصل",
+    "addressTitle": "العنوان",
+    "phoneTitle": "الهاتف",
+    "emailTitle": "البريد الإلكتروني",
+    "hoursTitle": "ساعات العمل",
+    "hoursDays": "الأحد - الخميس",
+    "hoursTime": "٩:٠٠ ص - ٥:٠٠ م",
+    "whatsappBtn": "واتساب",
+    "callBtn": "اتصل الآن"
+  },
+  "form": {
+    "heading": "أرسل لنا رسالة",
+    "submitBtn": "إرسال الرسالة",
+    "successTitle": "تم الإرسال بنجاح!",
+    "successMsg": "شكراً لتواصلك معنا. سنرد عليك في أقرب وقت.",
+    "sendAnother": "إرسال رسالة أخرى",
+    "messageLabel": "الرسالة",
+    "messagePlaceholder": "اكتب رسالتك هنا..."
+  },
+  "formFields": [
+    { "key": "name", "label": "الاسم الكامل", "type": "text", "placeholder": "أدخل اسمك" },
+    { "key": "email", "label": "البريد الإلكتروني", "type": "email", "placeholder": "أدخل بريدك الإلكتروني" },
+    { "key": "phone", "label": "رقم الهاتف", "type": "tel", "placeholder": "أدخل رقم هاتفك" },
+    { "key": "subject", "label": "الموضوع", "type": "text", "placeholder": "موضوع الرسالة" }
+  ]
+}

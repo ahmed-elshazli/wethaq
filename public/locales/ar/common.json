@@ -1,0 +1,51 @@
+{
+  "navItems": [
+    { "label": "الرئيسية", "path": "/" },
+    { "label": "من نحن", "path": "/about" },
+    { "label": "الخدمات", "path": "/services" },
+    { "label": "فريق العمل", "path": "/team" },
+    { "label": "المدونة", "path": "/blog" },
+    { "label": "موقعنا", "path": "/locations" },
+    { "label": "اتصل بنا", "path": "/contact" }
+  ],
+  "header": {
+    "freeConsultation": "استشارة مجانية",
+    "bookConsultation": "احجز استشارة",
+    "closeMenu": "إغلاق",
+    "openMenu": "قائمة"
+  },
+  "hero": {
+    "home": "الرئيسية"
+  },
+  "readMore": "اقرأ المزيد",
+  "footer": {
+    "description": "شركة مهنية تجمع بين الخبرة القانونية والرؤية العملية، نقدم خدمات قانونية متكاملة تلتزم بأعلى معايير الجودة والاحتراف.",
+    "ourServices": "خدماتنا",
+    "servicesList": [
+      "الاستشارات القانونية",
+      "الترافع والتمثيل القضائي",
+      "صياغة العقود",
+      "القضايا التجارية",
+      "القضايا العمالية",
+      "التحكيم"
+    ],
+    "quickLinksTitle": "روابط سريعة",
+    "quickLinks": [
+      { "label": "من نحن", "path": "/about" },
+      { "label": "فريق العمل", "path": "/team" },
+      { "label": "المدونة", "path": "/blog" },
+      { "label": "موقعنا", "path": "/locations" },
+      { "label": "سياسة الخصوصية", "path": "/privacy" },
+      { "label": "الشروط والأحكام", "path": "/terms" }
+    ],
+    "contactUs": "تواصل معنا",
+    "whatsapp": "واتساب",
+    "copyright": "© {{year}} وثاق الحق للمحاماة والاستشارات القانونية. جميع الحقوق محفوظة.",
+    "designedBy": "تصميم وتطوير: Media Glow"
+  },
+  "notFound": {
+    "title": "الصفحة غير موجودة",
+    "message": "عذرًا، الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "backHome": "العودة للرئيسية"
+  }
+}
