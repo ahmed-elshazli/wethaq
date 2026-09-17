@@ -1,32 +1,47 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLangStore } from '@/store/useLangStore';
-import { getAboutApi } from '../api/aboutApi';
+import api from '@/utils/axios';
 
 export const useAbout = () => {
   const lang = useLangStore((state) => state.lang);
 
   return useQuery({
-    queryKey: ['about-us', lang],
+    queryKey: ['about-page', lang],
     queryFn: async () => {
-      const res = await getAboutApi(lang);
-      
-      // الداتا بترجع String، هنغلفها عشان دالة l() في الـ UI بتاعك
+      // 1. جلب داتا About
+      const aboutRes = await api.get('/api/v1/about-us', { headers: { 'Accept-Language': lang } }).catch(() => ({ data: null }));
+      // 2. جلب داتا Why Us
+      const whyRes = await api.get('/api/v1/why-us', { headers: { 'Accept-Language': lang } }).catch(() => ({ data: null }));
+      // 3. 👈 جلب داتا الشركاء الحقيقية من الداشبورد
+      const partnersRes = await api.get('/api/v1/partners', { headers: { 'Accept-Language': lang } }).catch(() => ({ data: null }));
+
       const wrap = (val: string | undefined) => (val ? { ar: val, en: val } : undefined);
-      
+
       return {
-        tag: wrap(res?.tag),
-        heading: wrap(res?.heading),
-        p1: wrap(res?.paragraph1),
-        p2: wrap(res?.paragraph2),
-        vision: wrap(res?.vision),
-        mission: wrap(res?.mission),
-        values: wrap(res?.values),
-        image: res?.image // صورة الخلفية من الـ API
+        aboutData: {
+          tag: wrap(aboutRes.data?.tag),
+          heading: wrap(aboutRes.data?.heading),
+          p1: wrap(aboutRes.data?.paragraph1),
+          p2: wrap(aboutRes.data?.paragraph2),
+          vision: wrap(aboutRes.data?.vision),
+          mission: wrap(aboutRes.data?.mission),
+          values: wrap(aboutRes.data?.values),
+          image: aboutRes.data?.image
+        },
+        whyUsData: (whyRes.data?.data || whyRes.data)?.map((w: any) => ({
+          id: w._id,
+          title: wrap(w.title),
+          desc: wrap(w.description)
+        })) || [],
+        
+        // 👈 Mapping لبيانات الشركاء الحقيقية (الاسم والصورة)
+        partnersData: (partnersRes.data?.data || []).map((p: any) => ({
+          id: p._id,
+          name: p.name,       // لاحظ إن الباك إند باعتها String مش {ar, en} حسب الـ JSON بتاعك
+          logo: p.image       // سحبنا الصورة من Cloudinary 
+        }))
       };
     },
-    retry: (failureCount, error: any) => {
-      if (error?.response?.status === 404) return false;
-      return failureCount < 2;
-    }
+    retry: 1
   });
 };
