@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom"; // تم التعديل
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useLangStore } from "@/store/useLangStore"; // تم التعديل
-import { useServices } from "./hooks/useServices"; // تم الاستيراد
+import { useLangStore } from "@/store/useLangStore";
+import { useServices } from "./hooks/useServices";
 import deskImg from "@/imports/________.jpg.jpeg";
 
 const noto = "'Noto Kufi Arabic', sans-serif";
@@ -10,13 +10,15 @@ const ibm = "'IBM Plex Sans Arabic', sans-serif";
 export default function Services() {
   const { t } = useTranslation('services');
   const { isAr } = useLangStore();
-  const { data: list, isLoading } = useServices(); // جلب البيانات
+  const { data: list, isLoading } = useServices();
 
-  // Helper function لفك البيانات حسب اللغة
-  const l = (field: { ar: string, en: string }) => isAr ? field.ar : field.en;
+  const l = (field: { ar: string, en: string } | undefined) => {
+    if (!field) return '';
+    return isAr ? field.ar : field.en;
+  };
 
   if (isLoading) {
-    return <div style={{ minHeight: "100vh", background: "#111a11" }} />; // Loader بسيط
+    return <div style={{ minHeight: "100vh", background: "#111a11" }} />;
   }
 
   return (
@@ -25,7 +27,7 @@ export default function Services() {
         .svc-section { display: grid; grid-template-columns: 1fr 1fr; min-height: 520px; }
         .svc-section.reverse .svc-text { order: 2; }
         .svc-section.reverse .svc-img { order: 1; }
-        .svc-img { position: relative; overflow: hidden; }
+        .svc-img { position: relative; overflow: hidden; background: #253325; }
         .svc-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s ease; }
         .svc-section:hover .svc-img img { transform: scale(1.04); }
         .svc-text { display: flex; flex-direction: column; justify-content: center; padding: clamp(2rem, 6vw, 6rem) clamp(1.25rem, 5vw, 5rem); }
@@ -91,7 +93,7 @@ export default function Services() {
       </div>
 
       {/* Alternating service sections */}
-      {list?.map((svc, i) => {
+      {list?.map((svc: any, i: number) => {
         const isEven = i % 2 === 0;
         const bg = isEven ? "#ffffff" : "#faf8f4";
 
@@ -110,7 +112,7 @@ export default function Services() {
                   marginBottom: "1.25rem",
                 }}
               >
-                {svc.label}
+                {l(svc.label)}
               </span>
               <h2
                 style={{
@@ -140,10 +142,13 @@ export default function Services() {
                   lineHeight: 2,
                   marginBottom: "2.5rem",
                   maxWidth: 440,
+                  whiteSpace: "pre-line" // لضمان ظهور الفواصل بشكل سليم
                 }}
               >
                 {l(svc.desc)}
               </p>
+              
+              {/* الرابط بيوجه لصفحة التفاصيل، بس لازم نكون عارفين إنها مؤقتاً مش هتشتغل بكامل طاقتها */}
               <Link
                 to={`/services/${svc.slug}`}
                 style={{
@@ -173,7 +178,13 @@ export default function Services() {
 
             {/* Image */}
             <div className="svc-img">
-              <img src={svc.img} alt={l(svc.title)} />
+              {svc.img ? (
+                <img src={svc.img} alt={l(svc.title)} />
+              ) : (
+                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#c8b88a/30" }}>
+                  لا توجد صورة
+                </div>
+              )}
             </div>
           </div>
         );

@@ -1,4 +1,4 @@
-import { useParams, useNavigate, Link } from "react-router-dom"; // تم التعديل
+import { useParams, useNavigate, Link } from "react-router-dom"; 
 import { useTranslation } from "react-i18next";
 import { useLangStore } from "@/store/useLangStore";
 import { useServiceDetail, useServiceTabs } from "./hooks/useServiceDetail";
@@ -25,7 +25,7 @@ export default function ServiceDetail() {
   const { isAr } = useLangStore();
 
   // جلب التفاصيل للـ slug الحالي
-  const { data: activeUnit, isLoading: isUnitLoading } = useServiceDetail(slug || 'consultations');
+  const { data: activeUnit, isLoading: isUnitLoading } = useServiceDetail(slug || '');
   // جلب قائمة الـ Tabs (لشريط التنقل)
   const { data: tabs, isLoading: isTabsLoading } = useServiceTabs();
 
@@ -87,14 +87,14 @@ export default function ServiceDetail() {
             {t('hero.title')}
           </h1>
           <p style={{ fontFamily: ibm, fontSize: "clamp(0.85rem, 1.3vw, 1rem)", color: "rgba(237,228,211,0.6)", lineHeight: 1.9, textAlign: "start", marginBottom: "2.5rem" }}>
-            {t('hero.detailSubtitle', 'الشركة مؤسسة لتولي القضايا والاستشارات النوعية والكبيرة، وتشكّل من ثلاث وحدات عمل متخصصة.')}
+            {t('hero.detailSubtitle', 'نقدم خدمات قانونية متخصصة ومصممة لتلبية احتياجاتك.')} 
           </p>
         </div>
 
         {/* Tab bar */}
         <div style={{ position: "relative", borderTop: "1px solid rgba(184,150,46,0.15)" }}>
           <div className="svc-tab-bar" style={{ maxWidth: 1200, margin: "0 auto" }}>
-            {tabs?.map((u) => {
+            {tabs?.map((u: any) => {
               const isActive = u.slug === activeUnit.slug;
               return (
                 <button
@@ -114,7 +114,7 @@ export default function ServiceDetail() {
       {/* Content */}
       <div style={{ background: "#faf8f4", minHeight: "60vh" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.5rem, 4vw, 3.5rem)" }}>
-          {activeUnit.subs.map((sub, i) => {
+          {activeUnit.subs.map((sub: any, i: number) => {
             const Icon = IconMap[sub.iconName] || IconDocument; // Fallback icon
             const items = lArr(sub.items);
             return (
@@ -150,15 +150,16 @@ export default function ServiceDetail() {
                 </div>
 
                 {/* Left: bullet list */}
-                <ul style={{ listStyle: "disc", paddingInlineStart: "1.25rem", paddingInlineEnd: 0, display: "flex", flexDirection: "column", gap: "0.85rem", margin: 0, paddingTop: "0.25rem" }}>
+                <ul style={{ listStyle: "none", paddingInlineStart: 0, display: "flex", flexDirection: "column", gap: "0.85rem", margin: 0, paddingTop: "0.25rem" }}>
                   {items.map((item, j) => (
                     <li
                       key={j}
                       style={{
                         fontFamily: ibm,
-                        fontSize: "clamp(0.83rem, 1.1vw, 0.92rem)",
+                        fontSize: "clamp(0.83rem, 1.1vw, 1rem)",
                         color: "#3a3a32",
-                        lineHeight: 1.9,
+                        lineHeight: 2,
+                        whiteSpace: "pre-line" // لضمان عرض فواصل الأسطر
                       }}
                     >
                       {item}

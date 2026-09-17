@@ -15,7 +15,7 @@ import deskImg from "@/imports/________.jpg.jpeg";
 const SERVICE_ICONS = [IconScales, IconGavel, IconDocument, IconBriefcase, IconUsers, IconHandshake];
 const WHY_ICONS = [IconStar, IconLink, IconTarget, IconTrust];
 
-// مصفوفة احتياطية في حال غياب ملف الترجمة
+// مصفوفة احتياطية في حال غياب ملف الترجمة أو الداتا من الـ API
 const fallbackWhyItems = [
   { title: "خبرات قانونية متخصصة", desc: "نخبة من المحامين والمستشارين ذوي الكفاءات العالية في مختلف المجالات القانونية." },
   { title: "حلول قانونية متكاملة", desc: "نلبي احتياجات الأفراد وقطاع الأعمال وفق منهجية تراعي طبيعة كل عميل." },
@@ -39,9 +39,9 @@ export default function Home() {
 
   const l = (field: { ar: string, en: string } | undefined) => field ? (isAr ? field.ar : field.en) : '';
   
-  // التأكد من أن القيمة الراجعة من الترجمة عبارة عن مصفوفة، وإلا استخدام الاحتياطي
+  // دمج الداتا الحقيقية للـ Why Us، ولو فاضية نستخدم الترجمة أو الـ Fallback
   const translatedWhy = t('why', { returnObjects: true });
-  const whyItems = Array.isArray(translatedWhy) ? translatedWhy : fallbackWhyItems;
+  const whyItems = data?.whyUs && data.whyUs.length > 0 ? data.whyUs : (Array.isArray(translatedWhy) ? translatedWhy : fallbackWhyItems);
 
   const ArrowIcon = isAr ? IconArrowLeft : IconArrowRight;
   const pageRef = useRef<HTMLDivElement>(null);
@@ -74,10 +74,12 @@ export default function Home() {
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "30%", zIndex: 1, background: "linear-gradient(to bottom, transparent, rgba(30,43,30,0.95))" }} />
         <div style={{ position: "relative", zIndex: 2, maxWidth: 1280, margin: "0 auto", padding: "0 2rem", width: "100%" }}>
           <div style={{ maxWidth: 680 }}>
-            <div className="hero-tag" style={{ display: "inline-flex", alignItems: "center", gap: "0.6rem", border: "1px solid rgba(184,150,46,0.35)", padding: "0.4rem 1rem", marginBottom: "2rem" }}>
-              <span style={{ width: 5, height: 5, background: "#b8962e", borderRadius: "50%", display: "inline-block", flexShrink: 0 }} />
-              <span style={{ ...S.sectionLabel, letterSpacing: "0.1em" }}>{l(data.hero.tag)}</span>
-            </div>
+            {data.hero.tag && (
+              <div className="hero-tag" style={{ display: "inline-flex", alignItems: "center", gap: "0.6rem", border: "1px solid rgba(184,150,46,0.35)", padding: "0.4rem 1rem", marginBottom: "2rem" }}>
+                <span style={{ width: 5, height: 5, background: "#b8962e", borderRadius: "50%", display: "inline-block", flexShrink: 0 }} />
+                <span style={{ ...S.sectionLabel, letterSpacing: "0.1em" }}>{l(data.hero.tag)}</span>
+              </div>
+            )}
             <h1 className="hero-h1" style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontWeight: 700, fontSize: "clamp(2.1rem, 5.5vw, 3.75rem)", lineHeight: 1.22, color: "#f5edd8", marginBottom: "1.75rem" }}>
               {l(data.hero.h1a)}<br />
               <span style={{ color: "rgba(245,237,216,0.9)" }}>{t('hero.h1bPre', isAr ? 'فإن ' : '')}</span>
@@ -86,8 +88,8 @@ export default function Home() {
             </h1>
             <p className="hero-p" style={{ ...S.body, maxWidth: 520, fontSize: "1rem", lineHeight: 1.85, marginBottom: "2.5rem", color: "rgba(232,216,184,0.75)" }}>{l(data.hero.subtitle)}</p>
             <div className="hero-btns hero-ctas" style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-              <Link to="/contact" className="btn-primary" style={{ fontSize: "0.88rem", padding: "0.85rem 2.25rem" }}>{l(data.hero.cta1)}</Link>
-              <Link to="/services" className="btn-outline" style={{ fontSize: "0.88rem", padding: "0.85rem 2.25rem" }}>{l(data.hero.cta2)}</Link>
+              {data.hero.cta1 && <Link to="/contact" className="btn-primary" style={{ fontSize: "0.88rem", padding: "0.85rem 2.25rem" }}>{l(data.hero.cta1)}</Link>}
+              {data.hero.cta2 && <Link to="/services" className="btn-outline" style={{ fontSize: "0.88rem", padding: "0.85rem 2.25rem" }}>{l(data.hero.cta2)}</Link>}
             </div>
           </div>
         </div>
@@ -105,14 +107,16 @@ export default function Home() {
             <h2 style={{ ...S.h2, marginBottom: "1.5rem" }}>{l(data.about.heading)}</h2>
             <p style={{ ...S.body, marginBottom: "1rem" }}>{l(data.about.p1)}</p>
             <p style={{ ...S.body, marginBottom: "2.5rem" }}>{l(data.about.p2)}</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", background: "rgba(184,150,46,0.15)", marginBottom: "2.5rem" }}>
-              {data.stats.map(({ n, label }) => (
-                <div key={l(label)} style={{ background: "#1e2b1e", padding: "1.25rem 1rem", textAlign: "center" }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "1.6rem", fontWeight: 700, color: "#b8962e", lineHeight: 1 }}>{n}</div>
-                  <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "0.7rem", color: "rgba(232,216,184,0.5)", marginTop: "0.3rem" }}>{l(label)}</div>
-                </div>
-              ))}
-            </div>
+            {data.stats && data.stats.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", background: "rgba(184,150,46,0.15)", marginBottom: "2.5rem" }}>
+                {data.stats.map((stat: any, i: number) => (
+  <div key={stat.id || i} style={{ background: "#1e2b1e", padding: "1.25rem 1rem", textAlign: "center" }}>
+    <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "1.6rem", fontWeight: 700, color: "#b8962e", lineHeight: 1 }}>{stat.n}</div>
+    <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "0.7rem", color: "rgba(232,216,184,0.5)", marginTop: "0.3rem" }}>{l(stat.label)}</div>
+  </div>
+))}
+              </div>
+            )}
             <Link to="/about" className="btn-primary" style={{ fontSize: "0.88rem" }}>{t('aboutBtn', isAr ? 'اقرأ المزيد' : 'Read More')}</Link>
           </div>
           <div className="reveal reveal-delay-1" style={{ position: "relative" }}>
@@ -135,24 +139,26 @@ export default function Home() {
               {t('servicesMore', isAr ? 'عرض جميع الخدمات' : 'View All Services')}
             </Link>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.25rem" }} className="services-grid reveal reveal-delay-1">
-            {data.services.map((svc, i) => {
-              const Icon = SERVICE_ICONS[i % SERVICE_ICONS.length];
-              return (
-                <Link key={svc.id} to="/services" style={{ background: "#ffffff", padding: "2.25rem 2rem", textDecoration: "none", display: "flex", flexDirection: "column", border: "1px solid rgba(184,150,46,0.18)", transition: "box-shadow 0.25s, border-color 0.25s, transform 0.25s" }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 12px 40px rgba(37,51,37,0.1)"; e.currentTarget.style.transform = "translateY(-3px)"; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
-                  <div style={{ width: 48, height: 48, background: "rgba(184,150,46,0.08)", border: "1px solid rgba(184,150,46,0.25)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem", flexShrink: 0 }}>
-                    <Icon size={22} color="#b8962e" strokeWidth={1.5} />
-                  </div>
-                  <h3 style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontWeight: 700, color: "#1a2318", fontSize: "0.95rem", marginBottom: "0.75rem", lineHeight: 1.4 }}>{l(svc.title)}</h3>
-                  <p style={{ ...S.bodyLight, fontSize: "0.82rem", flexGrow: 1, marginBottom: "1.75rem" }}>{l(svc.desc)}</p>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginTop: "auto", borderTop: "1px solid rgba(184,150,46,0.15)", paddingTop: "1rem" }}>
-                    <span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "0.76rem", fontWeight: 600, color: "#b8962e" }}>{t('readMore', isAr ? 'اقرأ المزيد' : 'Read More')}</span>
-                    <ArrowIcon size={14} color="#b8962e" strokeWidth={2} />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          {data.services && data.services.length > 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.25rem" }} className="services-grid reveal reveal-delay-1">
+              {data.services.slice(0, 6).map((svc: any, i: number) => { // بنعرض أول 6 خدمات بس في الهوم
+                const Icon = SERVICE_ICONS[i % SERVICE_ICONS.length];
+                return (
+                  <Link key={svc.id} to={`/services/${svc.slug || ''}`} style={{ background: "#ffffff", padding: "2.25rem 2rem", textDecoration: "none", display: "flex", flexDirection: "column", border: "1px solid rgba(184,150,46,0.18)", transition: "box-shadow 0.25s, border-color 0.25s, transform 0.25s" }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 12px 40px rgba(37,51,37,0.1)"; e.currentTarget.style.transform = "translateY(-3px)"; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
+                    <div style={{ width: 48, height: 48, background: "rgba(184,150,46,0.08)", border: "1px solid rgba(184,150,46,0.25)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem", flexShrink: 0 }}>
+                      <Icon size={22} color="#b8962e" strokeWidth={1.5} />
+                    </div>
+                    <h3 style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontWeight: 700, color: "#1a2318", fontSize: "0.95rem", marginBottom: "0.75rem", lineHeight: 1.4 }}>{l(svc.title)}</h3>
+                    <p style={{ ...S.bodyLight, fontSize: "0.82rem", flexGrow: 1, marginBottom: "1.75rem", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical" }}>{l(svc.desc)}</p>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginTop: "auto", borderTop: "1px solid rgba(184,150,46,0.15)", paddingTop: "1rem" }}>
+                      <span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "0.76rem", fontWeight: 600, color: "#b8962e" }}>{t('readMore', isAr ? 'اقرأ المزيد' : 'Read More')}</span>
+                      <ArrowIcon size={14} color="#b8962e" strokeWidth={2} />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -166,10 +172,10 @@ export default function Home() {
             <h2 style={{ ...S.h2, marginTop: "0.5rem" }}>{t('whyH', isAr ? 'ما يميز وثاق الحق' : 'What Sets Wethaq Apart')}</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", background: "rgba(184,150,46,0.15)" }} className="why-grid reveal reveal-delay-1">
-            {whyItems.map((w, i) => {
+            {whyItems.map((w: any, i: number) => {
               const Icon = WHY_ICONS[i % WHY_ICONS.length];
               return (
-                <div key={w.title} style={{ background: "rgba(30,43,30,0.85)", padding: "2.5rem 1.75rem", backdropFilter: "blur(8px)" }}>
+                <div key={w.id || i} style={{ background: "rgba(30,43,30,0.85)", padding: "2.5rem 1.75rem", backdropFilter: "blur(8px)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
                     <div style={{ width: 44, height: 44, border: "1px solid rgba(184,150,46,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon size={20} color="#b8962e" strokeWidth={1.5} /></div>
                     <span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "0.65rem", color: "rgba(184,150,46,0.5)", fontWeight: 700, letterSpacing: "0.1em" }}>0{i + 1}</span>
@@ -194,23 +200,36 @@ export default function Home() {
             </div>
             <Link to="/team" className="btn-outline" style={{ fontSize: "0.82rem", whiteSpace: "nowrap" }}>{t('teamBtn', isAr ? 'تعرف على الفريق كاملاً' : 'Meet the Full Team')}</Link>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.25rem" }} className="team-grid reveal reveal-delay-1">
-            {data.team.map((m, i) => (
-              <div key={m.id} style={{ background: "#1e2b1e", border: "1px solid rgba(184,150,46,0.1)", overflow: "hidden" }}>
-                <div style={{ height: 190, background: `linear-gradient(145deg, #111a11 0%, ${["#1e2b1e", "#222e22", "#1a281a", "#202d20"][i % 4]} 100%)`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
-                  <div style={{ position: "absolute", bottom: "0.75rem", insetInlineStart: "0.75rem", background: "#b8962e", padding: "0.2rem 0.6rem" }}>
-                    <span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "0.65rem", fontWeight: 700, color: "#111a11" }}>{l(m.exp)}</span>
+          {data.team && data.team.length > 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.25rem" }} className="team-grid reveal reveal-delay-1">
+              {data.team.map((m: any, i: number) => (
+                <div key={m.id} style={{ background: "#1e2b1e", border: "1px solid rgba(184,150,46,0.1)", overflow: "hidden" }}>
+                  <div style={{ height: 190, background: `linear-gradient(145deg, #111a11 0%, ${["#1e2b1e", "#222e22", "#1a281a", "#202d20"][i % 4]} 100%)`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+                    
+                    {/* 👈 هنا ضفنا الصورة الحقيقية */}
+                    {m.image && (
+                      <img src={m.image} alt={l(m.name)} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />
+                    )}
+                    
+                    {/* 👈 طبقة ظل خفيفة من تحت عشان مربع الخبرة يفضل واضح */}
+                    {m.image && (
+                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(17,26,17,0.7) 0%, transparent 40%)" }} />
+                    )}
+
+                    <div style={{ position: "absolute", bottom: "0.75rem", insetInlineStart: "0.75rem", background: "#b8962e", padding: "0.2rem 0.6rem", zIndex: 1 }}>
+                      <span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "0.65rem", fontWeight: 700, color: "#111a11" }}>{l(m.exp)}</span>
+                    </div>
+                  </div>
+                  <div style={{ padding: "1.4rem 1.5rem" }}>
+                    <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontWeight: 700, color: "#f5edd8", fontSize: "0.88rem", marginBottom: "0.3rem", lineHeight: 1.4 }}>{l(m.name)}</div>
+                    <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "#b8962e", fontSize: "0.72rem", marginBottom: "0.35rem" }}>{l(m.role)}</div>
+                    <div style={{ width: 24, height: 1, background: "rgba(184,150,46,0.3)", marginBottom: "0.4rem" }} />
+                    <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "rgba(232,216,184,0.4)", fontSize: "0.7rem" }}>{l(m.spec)}</div>
                   </div>
                 </div>
-                <div style={{ padding: "1.4rem 1.5rem" }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontWeight: 700, color: "#f5edd8", fontSize: "0.88rem", marginBottom: "0.3rem", lineHeight: 1.4 }}>{l(m.name)}</div>
-                  <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "#b8962e", fontSize: "0.72rem", marginBottom: "0.35rem" }}>{l(m.role)}</div>
-                  <div style={{ width: 24, height: 1, background: "rgba(184,150,46,0.3)", marginBottom: "0.4rem" }} />
-                  <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "rgba(232,216,184,0.4)", fontSize: "0.7rem" }}>{l(m.spec)}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -225,38 +244,42 @@ export default function Home() {
             </div>
             <Link to="/blog" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.65rem 1.6rem", border: "1px solid rgba(37,51,37,0.35)", color: "#253325", fontSize: "0.82rem", fontWeight: 600, textDecoration: "none" }}>{t('blogBtn', isAr ? 'عرض جميع المقالات' : 'View All Articles')}</Link>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr 1fr", gap: "1.25rem" }} className="blog-grid reveal reveal-delay-1">
-            {data.blog.map((post, i) => (
-              <Link key={post.id} to="/blog" style={{ textDecoration: "none", display: "flex", flexDirection: "column", background: "#ffffff", border: "1px solid rgba(184,150,46,0.18)", overflow: "hidden" }}>
-                <div style={{ height: i === 0 ? 240 : 160, overflow: "hidden", flexShrink: 0, position: "relative" }}>
-                  <img src={post.image} alt={l(post.title)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  <div style={{ position: "absolute", top: "1rem", insetInlineStart: "1rem", background: "#b8962e", padding: "0.2rem 0.75rem" }}><span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "#fff", fontSize: "0.62rem", fontWeight: 700 }}>{l(post.cat)}</span></div>
-                </div>
-                <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", flexGrow: 1 }}>
-                  <h3 style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontWeight: 700, color: "#1a2318", fontSize: i === 0 ? "0.97rem" : "0.86rem", lineHeight: 1.6, marginBottom: "auto", paddingBottom: "1.25rem" }}>{l(post.title)}</h3>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(184,150,46,0.15)", paddingTop: "1rem" }}>
-                    <span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "rgba(37,51,37,0.45)", fontSize: "0.7rem" }}>{l(post.date)}</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}><span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "#b8962e", fontSize: "0.72rem", fontWeight: 600 }}>{t('readMore', isAr ? 'اقرأ المزيد' : 'Read More')}</span><ArrowIcon size={13} color="#b8962e" strokeWidth={2} /></div>
+          {data.blog && data.blog.length > 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr 1fr", gap: "1.25rem" }} className="blog-grid reveal reveal-delay-1">
+              {data.blog.map((post: any, i: number) => (
+                <Link key={post.id} to={`/blog/${post.slug || ''}`} style={{ textDecoration: "none", display: "flex", flexDirection: "column", background: "#ffffff", border: "1px solid rgba(184,150,46,0.18)", overflow: "hidden" }}>
+                  <div style={{ height: i === 0 ? 240 : 160, overflow: "hidden", flexShrink: 0, position: "relative" }}>
+                    {post.image && <img src={post.image} alt={l(post.title)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                    <div style={{ position: "absolute", top: "1rem", insetInlineStart: "1rem", background: "#b8962e", padding: "0.2rem 0.75rem" }}><span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "#fff", fontSize: "0.62rem", fontWeight: 700 }}>{l(post.cat)}</span></div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                  <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", flexGrow: 1 }}>
+                    <h3 style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontWeight: 700, color: "#1a2318", fontSize: i === 0 ? "0.97rem" : "0.86rem", lineHeight: 1.6, marginBottom: "auto", paddingBottom: "1.25rem" }}>{l(post.title)}</h3>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(184,150,46,0.15)", paddingTop: "1rem" }}>
+                      <span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "rgba(37,51,37,0.45)", fontSize: "0.7rem" }}>{l(post.date)}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}><span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "#b8962e", fontSize: "0.72rem", fontWeight: 600 }}>{t('readMore', isAr ? 'اقرأ المزيد' : 'Read More')}</span><ArrowIcon size={13} color="#b8962e" strokeWidth={2} /></div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section style={{ position: "relative", background: "#b8962e", padding: "5.5rem 2rem", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 14px)" }} />
-        <div style={{ position: "relative", maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "clamp(1.6rem, 3.5vw, 2.5rem)", fontWeight: 700, color: "#111a11", marginBottom: "1rem", lineHeight: 1.3 }}>{l(data.cta.heading)}</h2>
-          <p style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "rgba(17,26,17,0.7)", fontSize: "0.95rem", lineHeight: 1.85, marginBottom: "2.25rem" }}>{l(data.cta.body)}</p>
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link to="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.85rem 2.25rem", background: "#111a11", color: "#b8962e", fontWeight: 700, fontSize: "0.88rem", textDecoration: "none", fontFamily: "'IBM Plex Sans Arabic', sans-serif" }}>{l(data.cta.btn1)}</Link>
-            <a href="https://wa.me/966" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.85rem 2.25rem", border: "2px solid rgba(17,26,17,0.5)", color: "#111a11", fontWeight: 600, fontSize: "0.88rem", textDecoration: "none", fontFamily: "'IBM Plex Sans Arabic', sans-serif" }}>{l(data.cta.btn2)}</a>
+      {data.cta && data.cta.heading && (
+        <section style={{ position: "relative", background: "#b8962e", padding: "5.5rem 2rem", overflow: "hidden" }}>
+          <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 14px)" }} />
+          <div style={{ position: "relative", maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
+            <h2 style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "clamp(1.6rem, 3.5vw, 2.5rem)", fontWeight: 700, color: "#111a11", marginBottom: "1rem", lineHeight: 1.3 }}>{l(data.cta.heading)}</h2>
+            <p style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", color: "rgba(17,26,17,0.7)", fontSize: "0.95rem", lineHeight: 1.85, marginBottom: "2.25rem" }}>{l(data.cta.body)}</p>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+              {data.cta.btn1 && <Link to="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.85rem 2.25rem", background: "#111a11", color: "#b8962e", fontWeight: 700, fontSize: "0.88rem", textDecoration: "none", fontFamily: "'IBM Plex Sans Arabic', sans-serif" }}>{l(data.cta.btn1)}</Link>}
+              {data.cta.btn2 && <a href={data.cta.whatsapp ? `https://wa.me/${data.cta.whatsapp}` : "https://wa.me/966"} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.85rem 2.25rem", border: "2px solid rgba(17,26,17,0.5)", color: "#111a11", fontWeight: 600, fontSize: "0.88rem", textDecoration: "none", fontFamily: "'IBM Plex Sans Arabic', sans-serif" }}>{l(data.cta.btn2)}</a>}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <style>{`
         @keyframes hero-vid-zoom { from { transform: scale(1); } to { transform: scale(1.06); } }

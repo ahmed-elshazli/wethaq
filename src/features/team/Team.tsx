@@ -3,24 +3,24 @@ import { useTranslation } from "react-i18next";
 import { useLangStore } from "@/store/useLangStore";
 import { useTeam } from "./hooks/useTeam";
 import { IconPhone, IconMail, IconLink, IconWhatsApp } from "@/components/Icons";
-
-// استخدمنا صورة موجودة بالفعل ونتأكد من مسارها
-import deskImg from "@/imports/________.jpg.jpeg"; 
+import deskImg from "@/imports/________.jpg.jpeg";
 
 const noto = "'Noto Kufi Arabic', sans-serif";
 const ibm = "'IBM Plex Sans Arabic', sans-serif";
 
-// تم استبدال الـ SVG المعقدة بأيقوناتنا النظيفة
-function SocialIcons() {
+// مررنا البيانات للـ SocialIcons عشان الزراير تكون شغالة
+function SocialIcons({ phone, email }: { phone?: string, email?: string }) {
   return (
     <div style={{ display: "flex", gap: 8 }}>
       <a href="#" style={{ border: "1px solid #e3ddd1", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e3ddd1")} onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
         <IconLink size={16} color="#3E4C37" strokeWidth={1.6} />
       </a>
-      <a href="#" style={{ border: "1px solid #e3ddd1", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e3ddd1")} onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+      {/* 👈 رابط التليفون */}
+      <a href={phone ? `tel:${phone}` : "#"} style={{ border: "1px solid #e3ddd1", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e3ddd1")} onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
         <IconPhone size={16} color="#3E4C37" strokeWidth={1.6} />
       </a>
-      <a href="#" style={{ border: "1px solid #e3ddd1", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e3ddd1")} onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+      {/* 👈 رابط الإيميل */}
+      <a href={email ? `mailto:${email}` : "#"} style={{ border: "1px solid #e3ddd1", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e3ddd1")} onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
         <IconMail size={16} color="#3E4C37" strokeWidth={1.6} />
       </a>
     </div>
@@ -37,11 +37,22 @@ export default function Team() {
     return isAr ? field.ar : field.en;
   };
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return <div style={{ minHeight: "100vh", background: "#1e2818" }} />;
   }
 
-  const { featured, members } = data;
+  if (!data) {
+    return (
+      <div style={{ minHeight: "60vh", background: "#faf8f4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ fontFamily: ibm, fontSize: "1.1rem", color: "#6b6a62" }}>لم يتم إضافة أعضاء للفريق بعد.</p>
+      </div>
+    );
+  }
+
+  const { featured, members, settings } = data;
+
+  // تنظيف رقم الواتساب من أي مسافات أو علامات عشان الرابط يشتغل صح
+const cleanWhatsapp = settings?.whatsapp ? settings.whatsapp.replace(/[^0-9]/g, '') : '';
 
   return (
     <div>
@@ -64,7 +75,6 @@ export default function Team() {
 
       {/* Hero */}
       <div style={{ position: "relative", background: "#1e2818", overflow: "hidden", padding: "5rem 1.5rem 4rem" }}>
-        <img src={deskImg} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.1, pointerEvents: "none" }} />
         <div style={{ position: "absolute", inset: 0, background: "rgba(22,30,18,0.7)" }} />
         <div style={{ position: "relative", maxWidth: 1196, margin: "0 auto" }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: "1.5rem" }}>
@@ -89,7 +99,11 @@ export default function Team() {
           {/* Featured member */}
           <div className="team-featured" style={{ display: "flex", gap: "clamp(1.5rem, 5vw, 5rem)", alignItems: "center", padding: "clamp(2.5rem, 5vw, 5rem) 0", borderBottom: "1px solid #e3ddd1", flexWrap: "wrap" }}>
             <div className="team-featured-img" style={{ flexShrink: 0 }}>
-              <img src={featured.img} alt={l(featured.name)} style={{ width: "100%", aspectRatio: "432 / 540", objectFit: "cover", borderRadius: 42, display: "block" }} />
+              {featured.img ? (
+                <img src={featured.img} alt={l(featured.name)} style={{ width: "100%", aspectRatio: "432 / 540", objectFit: "cover", borderRadius: 42, display: "block" }} />
+              ) : (
+                <div style={{ width: "100%", aspectRatio: "432 / 540", background: "#1e2818", borderRadius: 42, display: "flex", alignItems: "center", justifyContent: "center", color: "#c8b88a" }}>بدون صورة</div>
+              )}
             </div>
             <div style={{ flex: 1, minWidth: 280 }}>
               <span style={{ fontFamily: ibm, fontWeight: 600, fontSize: 20, color: "#a6843f", display: "block", marginBottom: "0.65rem" }}>
@@ -107,38 +121,47 @@ export default function Team() {
               <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
                 <div>
                   <p style={{ fontFamily: ibm, fontSize: 13, color: "#5a6852", marginBottom: "0.35rem" }}>{t('labels.mobile', 'رقم الجوال')}</p>
-                  <p style={{ fontFamily: ibm, fontSize: 16, color: "#232e20" }}>{featured.phone}</p>
+                  {/* 👈 رابط التليفون الديناميكي */}
+                  <a href={`tel:${featured.phone}`} style={{ fontFamily: ibm, fontSize: 16, color: "#232e20", textDecoration: "none" }}>{featured.phone}</a>
                 </div>
                 <div>
                   <p style={{ fontFamily: ibm, fontSize: 13, color: "#5a6852", marginBottom: "0.35rem" }}>{t('labels.email', 'البريد الإلكتروني')}</p>
-                  <p style={{ fontFamily: ibm, fontSize: 16, color: "#232e20" }}>{featured.email}</p>
+                  {/* 👈 رابط الإيميل الديناميكي */}
+                  <a href={`mailto:${featured.email}`} style={{ fontFamily: ibm, fontSize: 16, color: "#232e20", textDecoration: "none" }}>{featured.email}</a>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 3-member grid */}
-          <div className="team-cards" style={{ display: "grid", gap: "clamp(16px, 3vw, 44px)", padding: "clamp(2rem, 4vw, 4rem) 0 clamp(2.5rem, 5vw, 5rem)" }}>
-            {members.map((m) => (
-              <div key={m.id} style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ overflow: "hidden", aspectRatio: "345 / 432", background: "#1e2818" }}>
-                  <img src={m.img} alt={l(m.name)} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          {/* 3-member grid (or more) */}
+          {members && members.length > 0 && (
+            <div className="team-cards" style={{ display: "grid", gap: "clamp(16px, 3vw, 44px)", padding: "clamp(2rem, 4vw, 4rem) 0 clamp(2.5rem, 5vw, 5rem)" }}>
+              {members.map((m: any) => (
+                <div key={m.id} style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ overflow: "hidden", aspectRatio: "345 / 432", background: "#1e2818" }}>
+                    {m.img ? (
+                      <img src={m.img} alt={l(m.name)} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    ) : (
+                      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#c8b88a" }}>بدون صورة</div>
+                    )}
+                  </div>
+                  <div style={{ paddingTop: 20 }}>
+                    <h3 style={{ fontFamily: noto, fontWeight: 400, fontSize: 18, color: "#1e2818", lineHeight: "24.75px", marginBottom: "0.5rem" }}>
+                      {l(m.name)}
+                    </h3>
+                    <p style={{ fontFamily: ibm, fontWeight: 500, fontSize: 13, color: "#a6843f", letterSpacing: "0.65px", marginBottom: "0.85rem" }}>
+                      {l(m.role)}
+                    </p>
+                    <p style={{ fontFamily: ibm, fontSize: 15, color: "#6b6a62", lineHeight: "24.375px", marginBottom: "1.5rem" }}>
+                      {l(m.bio)}
+                    </p>
+                    {/* 👈 تمرير البيانات للأيقونات */}
+                    <SocialIcons phone={m.phone} email={m.email} />
+                  </div>
                 </div>
-                <div style={{ paddingTop: 20 }}>
-                  <h3 style={{ fontFamily: noto, fontWeight: 400, fontSize: 18, color: "#1e2818", lineHeight: "24.75px", marginBottom: "0.5rem" }}>
-                    {l(m.name)}
-                  </h3>
-                  <p style={{ fontFamily: ibm, fontWeight: 500, fontSize: 13, color: "#a6843f", letterSpacing: "0.65px", marginBottom: "0.85rem" }}>
-                    {l(m.role)}
-                  </p>
-                  <p style={{ fontFamily: ibm, fontSize: 15, color: "#6b6a62", lineHeight: "24.375px", marginBottom: "1.5rem" }}>
-                    {l(m.bio)}
-                  </p>
-                  <SocialIcons />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -169,8 +192,10 @@ export default function Team() {
               <IconLink size={16} color="#161E12" strokeWidth={1.75} />
               {t('cta.bookBtn', 'احجز استشارة قانونية')}
             </Link>
+            
+            {/* 👈 رابط الواتساب الديناميكي */}
             <a
-              href="https://wa.me/966XXXXXXXX"
+              href={`https://wa.me/${cleanWhatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{ display: "inline-flex", alignItems: "center", gap: 12, padding: "0 1.5rem", height: 52, border: "1px solid rgba(237,228,211,0.35)", color: "#ede4d3", fontFamily: ibm, fontSize: 16, textDecoration: "none", whiteSpace: "nowrap" }}
@@ -178,12 +203,14 @@ export default function Team() {
               <IconWhatsApp size={17} color="#EDE4D3" />
               {t('cta.whatsapp', 'واتساب')}
             </a>
+            
+            {/* 👈 رابط التليفون الديناميكي */}
             <a
-              href="tel:+966114567890"
-              style={{ display: "inline-flex", alignItems: "center", gap: 12, padding: "0 1.5rem", height: 52, border: "1px solid rgba(237,228,211,0.35)", color: "#ede4d3", fontFamily: ibm, fontSize: 16, textDecoration: "none", whiteSpace: "nowrap" }}
+              href={`tel:${settings.phone}`}
+              style={{ display: "inline-flex", alignItems: "center", gap: 12, padding: "0 1.5rem", height: 52, border: "1px solid rgba(237,228,211,0.35)", color: "#ede4d3", fontFamily: ibm, fontSize: 16, textDecoration: "none", whiteSpace: "nowrap", direction: "ltr" }}
             >
               <IconPhone size={17} color="#EDE4D3" strokeWidth={1.6} />
-              +966 11 456 7890
+              {settings.phone}
             </a>
           </div>
         </div>

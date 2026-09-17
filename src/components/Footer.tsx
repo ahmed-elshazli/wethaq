@@ -1,39 +1,31 @@
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { useLangStore } from "@/store/useLangStore";
 import { useSiteSettings } from "@/features/settings/hooks/useSiteSettings";
+import { useServices } from "@/features/services/hooks/useServices"; // 👈 جلب الخدمات ديناميكياً من الباك إند
 import Logo from "@/components/Logo";
 
-// مصفوفات احتياطية في حالة عدم وجود الترجمة
-const fallbackServices = [
-  "الاستشارات القانونية",
-  "الترافع والتمثيل القضائي",
-  "صياغة العقود",
-  "القضايا التجارية",
-  "القضايا العمالية",
-  "التحكيم",
-];
-
-const fallbackLinks = [
-  { label: "من نحن", path: "/about" },
-  { label: "فريق العمل", path: "/team" },
-  { label: "المدونة", path: "/blog" },
-  { label: "موقعنا", path: "/locations" },
-  { label: "سياسة الخصوصية", path: "/privacy" },
-  { label: "الشروط والأحكام", path: "/terms" },
+// روابط سريعة ثابتة للمسارات الداخلية بالموقع
+const quickLinks = [
+  { label: { ar: "من نحن", en: "About Us" }, path: "/about" },
+  { label: { ar: "فريق العمل", en: "Our Team" }, path: "/team" },
+  { label: { ar: "المدونة", en: "Blog" }, path: "/blog" },
+  { label: { ar: "موقعنا", en: "Locations" }, path: "/locations" },
 ];
 
 export default function Footer() {
-  const { t } = useTranslation('common');
   const { isAr } = useLangStore();
+  
+  // 1. جلب إعدادات المكتب (العنوان، الهواتف، الوصف)
   const { data: settings } = useSiteSettings();
+  
+  // 2. جلب قائمة الخدمات الحقيقية من الداتابيز
+  const { data: servicesList } = useServices();
 
-  // جلب العناصر من الترجمة، واستخدام الاحتياطي إذا فشل الجلب أو لم يكن مصفوفة
-  const translatedServices = t('footer.servicesList', { returnObjects: true });
-  const services = Array.isArray(translatedServices) ? translatedServices : fallbackServices;
-
-  const translatedLinks = t('footer.quickLinks', { returnObjects: true });
-  const links = Array.isArray(translatedLinks) ? translatedLinks : fallbackLinks;
+  const l = (field: any) => {
+    if (!field) return '';
+    if (typeof field === 'string') return field;
+    return isAr ? field.ar : field.en;
+  };
 
   const currentYear = new Date().getFullYear();
 
@@ -54,7 +46,7 @@ export default function Footer() {
             paddingBottom: "3rem",
           }}
         >
-          {/* Brand */}
+          {/* Brand & Description */}
           <div>
             <Logo size="md" withText={true} />
             <p
@@ -66,7 +58,7 @@ export default function Footer() {
                 fontFamily: "'IBM Plex Sans Arabic', sans-serif",
               }}
             >
-              {t('footer.description', isAr ? "شركة مهنية تجمع بين الخبرة القانونية والرؤية العملية، نقدم خدمات قانونية متكاملة تلتزم بأعلى معايير الجودة والاحتراف." : "A professional firm combining legal expertise with practical vision...")}
+              {settings?.tagline ? l(settings.tagline) : (isAr ? "شركة مهنية تجمع بين الخبرة القانونية والرؤية العملية، نقدم خدمات قانونية متكاملة." : "A professional firm combining legal expertise with practical vision.")}
             </p>
             <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
               {["tw", "li", "ig"].map((s) => (
@@ -93,7 +85,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Services */}
+          {/* Services (Dynamic from DB) */}
           <div>
             <h4
               style={{
@@ -104,13 +96,52 @@ export default function Footer() {
                 fontFamily: "'IBM Plex Sans Arabic', sans-serif",
               }}
             >
-              {t('footer.ourServices', isAr ? "خدماتنا" : "Our Services")}
+              {isAr ? "خدماتنا" : "Our Services"}
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.6rem", padding: 0 }}>
-              {services.map((s) => (
-                <li key={typeof s === 'string' ? s : s.toString()}>
+              {servicesList && servicesList.length > 0 ? (
+                servicesList.slice(0, 6).map((service: any) => (
+                  <li key={service.slug || service.id}>
+                    <Link
+                      to={`/services/${service.slug}`}
+                      style={{
+                        color: "rgba(232,216,184,0.65)",
+                        fontSize: "0.8rem",
+                        textDecoration: "none",
+                        fontFamily: "'IBM Plex Sans Arabic', sans-serif",
+                        transition: "color 0.2s",
+                      }}
+                      onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#c9a84c")}
+                      onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "rgba(232,216,184,0.65)")}
+                    >
+                      {l(service.title)}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <li style={{ color: "rgba(232,216,184,0.4)", fontSize: "0.8rem" }}>{isAr ? "جاري تحميل الخدمات..." : "Loading services..."}</li>
+              )}
+            </ul>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4
+              style={{
+                color: "#b8962e",
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                marginBottom: "1.25rem",
+                fontFamily: "'IBM Plex Sans Arabic', sans-serif",
+              }}
+            >
+              {isAr ? "روابط سريعة" : "Quick Links"}
+            </h4>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.6rem", padding: 0 }}>
+              {quickLinks.map((lItem) => (
+                <li key={lItem.path}>
                   <Link
-                    to="/services"
+                    to={lItem.path}
                     style={{
                       color: "rgba(232,216,184,0.65)",
                       fontSize: "0.8rem",
@@ -121,14 +152,14 @@ export default function Footer() {
                     onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#c9a84c")}
                     onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "rgba(232,216,184,0.65)")}
                   >
-                    {typeof s === 'string' ? s : s.toString()}
+                    {l(lItem.label)}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Links */}
+          {/* Contact Info (Dynamic from Settings DB) */}
           <div>
             <h4
               style={{
@@ -139,48 +170,22 @@ export default function Footer() {
                 fontFamily: "'IBM Plex Sans Arabic', sans-serif",
               }}
             >
-              {t('footer.quickLinksTitle', isAr ? "روابط سريعة" : "Quick Links")}
-            </h4>
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.6rem", padding: 0 }}>
-              {links.map((l: any) => (
-                <li key={l.path}>
-                  <Link
-                    to={l.path || "#"}
-                    style={{
-                      color: "rgba(232,216,184,0.65)",
-                      fontSize: "0.8rem",
-                      textDecoration: "none",
-                      fontFamily: "'IBM Plex Sans Arabic', sans-serif",
-                      transition: "color 0.2s",
-                    }}
-                    onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#c9a84c")}
-                    onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "rgba(232,216,184,0.65)")}
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4
-              style={{
-                color: "#b8962e",
-                fontWeight: 600,
-                fontSize: "0.85rem",
-                marginBottom: "1.25rem",
-                fontFamily: "'IBM Plex Sans Arabic', sans-serif",
-              }}
-            >
-              {t('footer.contactUs', isAr ? "تواصل معنا" : "Contact Us")}
+              {isAr ? "تواصل معنا" : "Contact Us"}
             </h4>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
               {[
-                { icon: "📍", text: settings ? (isAr ? settings.riyadhAddress.ar : settings.riyadhAddress.en) : "..." },
-                { icon: "📞", text: settings?.phone || "..." },
-                { icon: "✉️", text: settings?.email || "..." },
+                { 
+                  icon: "📍", 
+                  text: settings?.riyadhAddress ? l(settings.riyadhAddress) : (isAr ? "الرياض، المملكة العربية السعودية" : "Riyadh, KSA")
+                },
+                { 
+                  icon: "📞", 
+                  text: settings?.phone || "+966 11 000 0000" 
+                },
+                { 
+                  icon: "✉️", 
+                  text: settings?.email || "info@wethaqalhaq.com" 
+                },
               ].map(({ icon, text }, i) => (
                 <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
                   <span style={{ fontSize: "0.85rem", marginTop: "0.1rem" }}>{icon}</span>
@@ -190,6 +195,7 @@ export default function Footer() {
                       fontSize: "0.78rem",
                       lineHeight: 1.6,
                       fontFamily: "'IBM Plex Sans Arabic', sans-serif",
+                      direction: icon === "📞" ? "ltr" : "inherit"
                     }}
                   >
                     {text}
@@ -199,7 +205,7 @@ export default function Footer() {
             </div>
 
             <a
-              href={`https://wa.me/${settings?.whatsapp || ''}`}
+              href={`https://wa.me/${settings?.whatsapp || settings?.phone || ''}`}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary"
@@ -211,7 +217,7 @@ export default function Footer() {
                 textDecoration: "none"
               }}
             >
-              {t('footer.whatsapp', isAr ? "واتساب" : "WhatsApp")}
+              {isAr ? "واتساب" : "WhatsApp"}
             </a>
           </div>
         </div>
@@ -235,7 +241,7 @@ export default function Footer() {
               fontFamily: "'IBM Plex Sans Arabic', sans-serif",
             }}
           >
-            {t('footer.copyright', { year: currentYear, defaultValue: isAr ? `© ${currentYear} وثاق الحق للمحاماة والاستشارات القانونية. جميع الحقوق محفوظة.` : `© ${currentYear} Wethaq Al-Haq Law Firm. All rights reserved.` })}
+            {isAr ? `© ${currentYear} ${settings ? l(settings.officeName) : "وثاق الحق"} للمحاماة والاستشارات القانونية. جميع الحقوق محفوظة.` : `© ${currentYear} ${settings ? l(settings.officeName) : "Wethaq Al-Haq"} Law Firm. All rights reserved.`}
           </p>
           <p
             style={{
@@ -244,7 +250,7 @@ export default function Footer() {
               fontFamily: "'IBM Plex Sans Arabic', sans-serif",
             }}
           >
-            {t('footer.designedBy', isAr ? "تصميم وتطوير: Media Glow" : "Designed by: Media Glow")}
+            {isAr ? "تصميم وتطوير: Media Glow" : "Designed by: Media Glow"}
           </p>
         </div>
       </div>
