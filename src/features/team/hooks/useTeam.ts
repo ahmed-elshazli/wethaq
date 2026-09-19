@@ -12,27 +12,32 @@ const getSettingsApi = async (lang: string) => {
   }
 };
 
-export const useTeam = () => {
+export const useTeam = (page: number = 1) => {
   const lang = useLangStore((state) => state.lang);
+  const limit = 6; // 👈 تحديد الـ Limit الثابت بـ 6
 
   return useQuery({
-    queryKey: ['team-page', lang],
+    queryKey: ['team-page', lang, page],
     queryFn: async () => {
       const [teamRes, settingsRes] = await Promise.all([
-        getTeamApi(lang),
+        // تمرير رقم الصفحة والـ Limit
+        getTeamApi(lang, page, limit), 
         getSettingsApi(lang)
       ]);
       
       const wrap = (val: string | undefined) => (val ? { ar: val, en: val } : undefined);
 
-      if (!teamRes || teamRes.length === 0) return null;
+      // التأكد من استخراج الداتا والـ pagination من الاستجابة بشكل صحيح
+      const teamData = teamRes?.data || (Array.isArray(teamRes) ? teamRes : []); 
+      const pagination = teamRes?.pagination || { numberOfPages: 1, currentPage: page };
 
-      // 🔴 التأكد من وجود قيم افتراضية قوية لو الـ settings مرجعتش
+      if (!teamData || teamData.length === 0) return null;
+
       const officeEmail = settingsRes?.email || "info@wethaq.com";
       const officePhone = settingsRes?.mainPhone || "+966 11 456 7890";
       const officeWhatsapp = settingsRes?.whatsapp || officePhone; 
 
-      const formattedTeam = teamRes.map((m: any) => ({
+      const formattedTeam = teamData.map((m: any) => ({
         id: m._id,
         name: wrap(m.name),
         role: wrap(m.role),
@@ -44,18 +49,24 @@ export const useTeam = () => {
         whatsapp: officeWhatsapp
       }));
 
-      const featured = formattedTeam[0];
-      const members = formattedTeam.slice(1);
+      // في الصفحة الأولى بنعرض العضو الأول كـ Featured
+      const isFirstPage = page === 1;
+      const featured = isFirstPage ? formattedTeam[0] : null;
+      const members = isFirstPage ? formattedTeam.slice(1) : formattedTeam;
 
       return { 
         featured, 
         members, 
-        // 🔴 تمرير الـ settings بشكل آمن جداً
         settings: { 
           email: officeEmail, 
           phone: officePhone, 
           whatsapp: officeWhatsapp 
-        } 
+        },
+        // تمرير تفاصيل الترقيم للواجهة
+        pagination: {
+          currentPage: pagination.currentPage || page,
+          totalPages: pagination.numberOfPages || 1,
+        }
       };
     },
     retry: 1

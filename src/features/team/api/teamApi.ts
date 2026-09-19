@@ -1,10 +1,16 @@
 import api from '@/utils/axios';
 
-export const getTeamApi = async (lang: string) => {
-  // بنطلب كل الفريق (50 كحد أقصى مثلاً) وبنبعت اللغة في الهيدر
+export const getTeamApi = async (lang: string, page: number = 1, limit: number = 6) => {
   const res = await api.get('/api/v1/team', {
     headers: { 'Accept-Language': lang },
-    params: { limit: 50 } // ممكن نمسح الـ limit لو الباك إند رفضها زي ما حصل قبل كده
+    params: { 
+      page: page,
+      limit: limit 
+    } 
   });
-  return res.data.data || res.data;
+  
+  // بنرجع الـ Response كامل عشان الـ Hook محتاج الـ data ومحتاج الـ pagination
+  // لو الباك إند بيرجع البيانات مباشرة كـ Array هنعتبرها هي الداتا،
+  // ولو بيرجع { data: [...], pagination: {...} } يبقى هنرجع الـ Object كله.
+  return res.data;
 };

@@ -1,3 +1,4 @@
+import { useEffect } from "react"; // 👈 أضفنا useEffect
 import { useParams, useNavigate, Link } from "react-router-dom"; 
 import { useTranslation } from "react-i18next";
 import { useLangStore } from "@/store/useLangStore";
@@ -29,15 +30,28 @@ export default function ServiceDetail() {
   // جلب قائمة الـ Tabs (لشريط التنقل)
   const { data: tabs, isLoading: isTabsLoading } = useServiceTabs();
 
-  // Helper functions لفك الترجمة من الـ API
-  const l = (field: { ar: string, en: string } | undefined) => {
+  // 👈 رفع الشاشة لأعلى عند تغيير الخدمة (slug)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [slug]);
+
+  // Helper functions لفك الترجمة مع حماية من الأخطاء
+  const l = (field: any): string => {
     if (!field) return '';
-    return isAr ? field.ar : field.en;
+    if (typeof field === 'string') return field;
+    if (typeof field === 'object') {
+      return String(isAr ? (field.ar || field.en || '') : (field.en || field.ar || ''));
+    }
+    return String(field);
   };
 
-  const lArr = (field: { ar: string[], en: string[] } | undefined) => {
+  const lArr = (field: any): string[] => {
     if (!field) return [];
-    return isAr ? field.ar : field.en;
+    if (Array.isArray(field)) return field;
+    if (typeof field === 'object') {
+      return Array.isArray(isAr ? field.ar : field.en) ? (isAr ? field.ar : field.en) : [];
+    }
+    return [];
   };
 
   if (isUnitLoading || isTabsLoading) {
@@ -100,6 +114,7 @@ export default function ServiceDetail() {
                 <button
                   key={u.slug}
                   className={`svc-tab${isActive ? " active" : ""}`}
+                  // 👈 بنستخدم navigate عشان نتنقل بدون reload
                   onClick={() => navigate(`/services/${u.slug}`)}
                   style={{ color: isActive ? "#f4efe5" : "rgba(237,228,211,0.45)", fontWeight: isActive ? 600 : 400 }}
                 >
@@ -114,7 +129,7 @@ export default function ServiceDetail() {
       {/* Content */}
       <div style={{ background: "#faf8f4", minHeight: "60vh" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.5rem, 4vw, 3.5rem)" }}>
-          {activeUnit.subs.map((sub: any, i: number) => {
+          {activeUnit.subs?.map((sub: any, i: number) => {
             const Icon = IconMap[sub.iconName] || IconDocument; // Fallback icon
             const items = lArr(sub.items);
             return (

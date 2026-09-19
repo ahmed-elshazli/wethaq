@@ -12,9 +12,14 @@ export default function Services() {
   const { isAr } = useLangStore();
   const { data: list, isLoading } = useServices();
 
-  const l = (field: { ar: string, en: string } | undefined) => {
+  // تعديل الدالة لتكون آمنة ولا تقبل إلا سلاسل نصية
+  const l = (field: any): string => {
     if (!field) return '';
-    return isAr ? field.ar : field.en;
+    if (typeof field === 'string') return field;
+    if (typeof field === 'object') {
+      return String(isAr ? (field.ar || field.en || '') : (field.en || field.ar || ''));
+    }
+    return String(field);
   };
 
   if (isLoading) {
@@ -60,7 +65,7 @@ export default function Services() {
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to left, rgba(17,26,17,0.95) 40%, rgba(17,26,17,0.7))" }} />
         <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: "1.5rem", justifyContent: "flex-start" }}>
-            <span style={{ fontFamily: ibm, color: "rgba(237,228,211,0.5)", fontSize: 13 }}>{t('hero.home')}</span>
+            <Link to="/" style={{ fontFamily: ibm, color: "rgba(237,228,211,0.5)", fontSize: 13, textDecoration: "none" }}>{t('hero.home')}</Link>
             <span style={{ color: "rgba(237,228,211,0.3)" }}>/</span>
             <span style={{ fontFamily: ibm, color: "rgba(237,228,211,0.4)", fontSize: 13 }}>{t('hero.title')}</span>
           </div>
@@ -98,7 +103,7 @@ export default function Services() {
         const bg = isEven ? "#ffffff" : "#faf8f4";
 
         return (
-          <div key={svc.id} className={`svc-section${isEven ? "" : " reverse"}`} style={{ background: bg }}>
+          <div key={svc.id || svc._id || Math.random()} className={`svc-section${isEven ? "" : " reverse"}`} style={{ background: bg }}>
             {/* Text */}
             <div className="svc-text">
               <span
@@ -142,13 +147,13 @@ export default function Services() {
                   lineHeight: 2,
                   marginBottom: "2.5rem",
                   maxWidth: 440,
-                  whiteSpace: "pre-line" // لضمان ظهور الفواصل بشكل سليم
+                  whiteSpace: "pre-line"
                 }}
               >
                 {l(svc.desc)}
               </p>
               
-              {/* الرابط بيوجه لصفحة التفاصيل، بس لازم نكون عارفين إنها مؤقتاً مش هتشتغل بكامل طاقتها */}
+              {/* التنقل באמצעות Link يمنع تحديث الصفحة بالكامل */}
               <Link
                 to={`/services/${svc.slug}`}
                 style={{
@@ -181,8 +186,8 @@ export default function Services() {
               {svc.img ? (
                 <img src={svc.img} alt={l(svc.title)} />
               ) : (
-                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#c8b88a/30" }}>
-                  لا توجد صورة
+                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(200, 184, 138, 0.3)" }}>
+                  {isAr ? "لا توجد صورة" : "No image"}
                 </div>
               )}
             </div>

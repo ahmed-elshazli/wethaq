@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom"; // تم التعديل
-
-import { useLangStore } from "@/store/useLangStore"; // تم التعديل
+import { Link } from "react-router-dom";
+import { useLangStore } from "@/store/useLangStore";
+import { useSiteSettings } from "@/features/settings/hooks/useSiteSettings";
+import { useEffect } from "react";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
@@ -9,11 +10,34 @@ interface LogoProps {
 
 export default function Logo({ size = "md", withText = true }: LogoProps) {
   const { isAr } = useLangStore();
+  
+  // 1. جلب البيانات من الباك إند
+  const { data: settingsRes } = useSiteSettings();
+  // تأمين استخراج الداتا (لمنع خطأ تداخل الـ data object)
+  const settings = settingsRes?.data || settingsRes;
+
+  // 👈 الخطوة 5: طباعة القيمة في الـ Console مؤقتاً للتأكد من وصول "وثاق الحق واحد 222"
+  useEffect(() => {
+    console.log("🔥 Logo Component - API officeName:", settings?.officeName);
+  }, [settings]);
+
+  // دالة آمنة لمعالجة أي Object ومنع الكراش
+  const getText = (field: any): string => {
+    if (!field) return '';
+    if (typeof field === 'string') return field;
+    if (typeof field === 'object') {
+      return String(isAr ? (field.ar || field.en || '') : (field.en || field.ar || ''));
+    }
+    return String(field);
+  };
+
+  const officeName = getText(settings?.officeName) || (isAr ? "وثاق الحق" : "Wethaq Al-Haq");
+  const tagline = getText(settings?.tagline) || (isAr ? "للمحاماة والاستشارات القانونية" : "Law Firm & Legal Consultations");
+
   const dim = size === "sm" ? 36 : size === "md" ? 48 : 64;
 
   return (
     <Link to="/" className="flex items-center gap-3 group" style={{ textDecoration: "none", minWidth: 0 }}>
-      {/* SVG code remains identical */}
       <svg
         width={dim}
         height={dim}
@@ -45,7 +69,7 @@ export default function Logo({ size = "md", withText = true }: LogoProps) {
               whiteSpace: "nowrap",
             }}
           >
-            {isAr ? "وثاق الحق" : "Wethaq Al-Haq"}
+            {officeName}
           </span>
           <span
             className="logo-sub"
@@ -53,12 +77,12 @@ export default function Logo({ size = "md", withText = true }: LogoProps) {
               fontFamily: "'IBM Plex Sans Arabic', sans-serif",
               color: "#B8962E",
               fontWeight: 400,
-              fontSize: size === "sm" ? "0.58rem" : "0.68rem",
+              fontSize: size === "sm" ? "0.58rem" : size === "md" ? "0.68rem" : "0.78rem",
               lineHeight: 1.4,
               whiteSpace: "nowrap",
             }}
           >
-            {isAr ? "للمحاماة والاستشارات القانونية" : "Law Firm & Legal Consultations"}
+            {tagline}
           </span>
         </div>
       )}

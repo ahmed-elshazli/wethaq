@@ -4,16 +4,18 @@ export interface LocalizedString {
 }
 
 export interface SiteSettings {
-  officeName: LocalizedString;
-  tagline: LocalizedString;
-  phone: string;
-  phone2: string;
-  email: string;
-  whatsapp: string;
-  address: LocalizedString;
-  riyadhAddress: LocalizedString;
-  jeddahAddress: LocalizedString;
-  dammamAddress: LocalizedString;
+  _id?: string;
+  officeName: string;
+  tagline: string;
+  mainPhone?: string;
+  extraPhone?: string;
+  email?: string;
+  whatsapp?: string;
+  riyadhAddress?: string;
+  jeddahAddress?: string;
+  dammamAddress?: string;
+  address?: string; // لو بتستخدمه في صفحة Contact
+  createdAt?: string;
+  updatedAt?: string;
+  __v?: number;
 }
-
-// يمكن استخدام هذه الأنواع المشتركة لاحقاً في الـ Feature Types

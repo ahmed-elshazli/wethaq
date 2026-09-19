@@ -15,7 +15,6 @@ import deskImg from "@/imports/________.jpg.jpeg";
 const SERVICE_ICONS = [IconScales, IconGavel, IconDocument, IconBriefcase, IconUsers, IconHandshake];
 const WHY_ICONS = [IconStar, IconLink, IconTarget, IconTrust];
 
-// مصفوفة احتياطية في حال غياب ملف الترجمة أو الداتا من الـ API
 const fallbackWhyItems = [
   { title: "خبرات قانونية متخصصة", desc: "نخبة من المحامين والمستشارين ذوي الكفاءات العالية في مختلف المجالات القانونية." },
   { title: "حلول قانونية متكاملة", desc: "نلبي احتياجات الأفراد وقطاع الأعمال وفق منهجية تراعي طبيعة كل عميل." },
@@ -39,7 +38,6 @@ export default function Home() {
 
   const l = (field: { ar: string, en: string } | undefined) => field ? (isAr ? field.ar : field.en) : '';
   
-  // دمج الداتا الحقيقية للـ Why Us، ولو فاضية نستخدم الترجمة أو الـ Fallback
   const translatedWhy = t('why', { returnObjects: true });
   const whyItems = data?.whyUs && data.whyUs.length > 0 ? data.whyUs : (Array.isArray(translatedWhy) ? translatedWhy : fallbackWhyItems);
 
@@ -109,12 +107,13 @@ export default function Home() {
             <p style={{ ...S.body, marginBottom: "2.5rem" }}>{l(data.about.p2)}</p>
             {data.stats && data.stats.length > 0 && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", background: "rgba(184,150,46,0.15)", marginBottom: "2.5rem" }}>
-                {data.stats.map((stat: any, i: number) => (
-  <div key={stat.id || i} style={{ background: "#1e2b1e", padding: "1.25rem 1rem", textAlign: "center" }}>
-    <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "1.6rem", fontWeight: 700, color: "#b8962e", lineHeight: 1 }}>{stat.n}</div>
-    <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "0.7rem", color: "rgba(232,216,184,0.5)", marginTop: "0.3rem" }}>{l(stat.label)}</div>
-  </div>
-))}
+                {/* تم التعديل هنا: استخدام slice(0, 3) لضمان عرض 3 إحصائيات فقط */}
+                {data.stats.slice(0, 3).map((stat: any, i: number) => (
+                  <div key={stat.id || i} style={{ background: "#1e2b1e", padding: "1.25rem 1rem", textAlign: "center" }}>
+                    <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "1.6rem", fontWeight: 700, color: "#b8962e", lineHeight: 1 }}>{stat.n}</div>
+                    <div style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "0.7rem", color: "rgba(232,216,184,0.5)", marginTop: "0.3rem" }}>{l(stat.label)}</div>
+                  </div>
+                ))}
               </div>
             )}
             <Link to="/about" className="btn-primary" style={{ fontSize: "0.88rem" }}>{t('aboutBtn', isAr ? 'اقرأ المزيد' : 'Read More')}</Link>
@@ -141,7 +140,7 @@ export default function Home() {
           </div>
           {data.services && data.services.length > 0 && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.25rem" }} className="services-grid reveal reveal-delay-1">
-              {data.services.slice(0, 6).map((svc: any, i: number) => { // بنعرض أول 6 خدمات بس في الهوم
+              {data.services.slice(0, 6).map((svc: any, i: number) => {
                 const Icon = SERVICE_ICONS[i % SERVICE_ICONS.length];
                 return (
                   <Link key={svc.id} to={`/services/${svc.slug || ''}`} style={{ background: "#ffffff", padding: "2.25rem 2rem", textDecoration: "none", display: "flex", flexDirection: "column", border: "1px solid rgba(184,150,46,0.18)", transition: "box-shadow 0.25s, border-color 0.25s, transform 0.25s" }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 12px 40px rgba(37,51,37,0.1)"; e.currentTarget.style.transform = "translateY(-3px)"; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}>
@@ -172,7 +171,8 @@ export default function Home() {
             <h2 style={{ ...S.h2, marginTop: "0.5rem" }}>{t('whyH', isAr ? 'ما يميز وثاق الحق' : 'What Sets Wethaq Apart')}</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", background: "rgba(184,150,46,0.15)" }} className="why-grid reveal reveal-delay-1">
-            {whyItems.map((w: any, i: number) => {
+            {/* تم التعديل هنا: استخدام slice(0, 4) لضمان عرض 4 عناصر فقط */}
+            {whyItems.slice(0, 4).map((w: any, i: number) => {
               const Icon = WHY_ICONS[i % WHY_ICONS.length];
               return (
                 <div key={w.id || i} style={{ background: "rgba(30,43,30,0.85)", padding: "2.5rem 1.75rem", backdropFilter: "blur(8px)" }}>
@@ -205,17 +205,8 @@ export default function Home() {
               {data.team.map((m: any, i: number) => (
                 <div key={m.id} style={{ background: "#1e2b1e", border: "1px solid rgba(184,150,46,0.1)", overflow: "hidden" }}>
                   <div style={{ height: 190, background: `linear-gradient(145deg, #111a11 0%, ${["#1e2b1e", "#222e22", "#1a281a", "#202d20"][i % 4]} 100%)`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
-                    
-                    {/* 👈 هنا ضفنا الصورة الحقيقية */}
-                    {m.image && (
-                      <img src={m.image} alt={l(m.name)} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />
-                    )}
-                    
-                    {/* 👈 طبقة ظل خفيفة من تحت عشان مربع الخبرة يفضل واضح */}
-                    {m.image && (
-                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(17,26,17,0.7) 0%, transparent 40%)" }} />
-                    )}
-
+                    {m.image && <img src={m.image} alt={l(m.name)} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />}
+                    {m.image && <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(17,26,17,0.7) 0%, transparent 40%)" }} />}
                     <div style={{ position: "absolute", bottom: "0.75rem", insetInlineStart: "0.75rem", background: "#b8962e", padding: "0.2rem 0.6rem", zIndex: 1 }}>
                       <span style={{ fontFamily: "'IBM Plex Sans Arabic', sans-serif", fontSize: "0.65rem", fontWeight: 700, color: "#111a11" }}>{l(m.exp)}</span>
                     </div>
