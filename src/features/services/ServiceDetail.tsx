@@ -1,20 +1,12 @@
-import { useEffect } from "react"; // 👈 أضفنا useEffect
+import { useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom"; 
 import { useTranslation } from "react-i18next";
 import { useLangStore } from "@/store/useLangStore";
 import { useServiceDetail, useServiceTabs } from "./hooks/useServiceDetail";
+import { useSubServices } from "./hooks/useServiceDetail"; // 👈 استيراد Hook الخدمات الفرعية
 import deskImg from "@/imports/________.jpg.jpeg";
 
-// Map string names from API to actual React components
-import {
-  IconScales, IconGavel, IconDocument, IconBriefcase,
-  IconUsers, IconHandshake, IconShield, IconBuilding,
-} from "@/components/Icons";
-
-const IconMap: Record<string, React.ElementType> = {
-  IconScales, IconGavel, IconDocument, IconBriefcase,
-  IconUsers, IconHandshake, IconShield, IconBuilding,
-};
+import { IconDocument } from "@/components/Icons";
 
 const noto = "'Noto Kufi Arabic', sans-serif";
 const ibm = "'IBM Plex Sans Arabic', sans-serif";
@@ -25,17 +17,23 @@ export default function ServiceDetail() {
   const { t } = useTranslation('services');
   const { isAr } = useLangStore();
 
-  // جلب التفاصيل للـ slug الحالي
+  // 1. جلب تفاصيل الخدمة الرئيسية
   const { data: activeUnit, isLoading: isUnitLoading } = useServiceDetail(slug || '');
-  // جلب قائمة الـ Tabs (لشريط التنقل)
+  
+  // 2. جلب قائمة الـ Tabs (لشريط التنقل)
   const { data: tabs, isLoading: isTabsLoading } = useServiceTabs();
 
-  // 👈 رفع الشاشة لأعلى عند تغيير الخدمة (slug)
+  // 3. 👈 جلب الخدمات الفرعية بناءً على الـ ID بتاع الخدمة الرئيسية المفتوحة
+  const { data: subServicesResponse, isLoading: isSubServicesLoading } = useSubServices(activeUnit?._id);
+  
+  // استخراج المصفوفة من الرد (تأكد من شكل الـ Response بتاعك)
+  const subServices = subServicesResponse?.data || subServicesResponse || [];
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [slug]);
 
-  // Helper functions لفك الترجمة مع حماية من الأخطاء
+  // Helper function لفك النصوص
   const l = (field: any): string => {
     if (!field) return '';
     if (typeof field === 'string') return field;
@@ -45,20 +43,10 @@ export default function ServiceDetail() {
     return String(field);
   };
 
-  const lArr = (field: any): string[] => {
-    if (!field) return [];
-    if (Array.isArray(field)) return field;
-    if (typeof field === 'object') {
-      return Array.isArray(isAr ? field.ar : field.en) ? (isAr ? field.ar : field.en) : [];
-    }
-    return [];
-  };
-
   if (isUnitLoading || isTabsLoading) {
      return <div style={{ minHeight: "100vh", background: "#111a11" }} />; 
   }
 
-  // Fallback in case of invalid slug
   if (!activeUnit) {
     navigate('/services', { replace: true });
     return null;
@@ -94,14 +82,14 @@ export default function ServiceDetail() {
             <Link to="/services" style={{ fontFamily: ibm, color: "rgba(237,228,211,0.45)", fontSize: 13, textDecoration: "none" }}>{t('hero.title')}</Link>
             <span style={{ color: "rgba(237,228,211,0.25)" }}>/</span>
             <span style={{ fontFamily: ibm, color: "rgba(237,228,211,0.35)", fontSize: 13 }}>
-              {l(activeUnit.tab)}
+              {l(activeUnit.name)}
             </span>
           </div>
           <h1 style={{ fontFamily: noto, fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3rem)", color: "#f4efe5", lineHeight: 1.2, marginBottom: "1rem", textAlign: "start" }}>
             {t('hero.title')}
           </h1>
           <p style={{ fontFamily: ibm, fontSize: "clamp(0.85rem, 1.3vw, 1rem)", color: "rgba(237,228,211,0.6)", lineHeight: 1.9, textAlign: "start", marginBottom: "2.5rem" }}>
-            {t('hero.detailSubtitle', 'نقدم خدمات قانونية متخصصة ومصممة لتلبية احتياجاتك.')} 
+            {l(activeUnit.description) || t('hero.detailSubtitle', 'نقدم خدمات قانونية متخصصة ومصممة لتلبية احتياجاتك.')} 
           </p>
         </div>
 
@@ -114,11 +102,10 @@ export default function ServiceDetail() {
                 <button
                   key={u.slug}
                   className={`svc-tab${isActive ? " active" : ""}`}
-                  // 👈 بنستخدم navigate عشان نتنقل بدون reload
                   onClick={() => navigate(`/services/${u.slug}`)}
                   style={{ color: isActive ? "#f4efe5" : "rgba(237,228,211,0.45)", fontWeight: isActive ? 600 : 400 }}
                 >
-                  {l(u.tab)}
+                  {l(u.name)}
                 </button>
               );
             })}
@@ -129,61 +116,75 @@ export default function ServiceDetail() {
       {/* Content */}
       <div style={{ background: "#faf8f4", minHeight: "60vh" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.5rem, 4vw, 3.5rem)" }}>
-          {activeUnit.subs?.map((sub: any, i: number) => {
-            const Icon = IconMap[sub.iconName] || IconDocument; // Fallback icon
-            const items = lArr(sub.items);
-            return (
-              <div key={i} className="svc-sub-row">
-                {/* Right: icon + title */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "1.25rem" }}>
-                  <div
-                    style={{
-                      width: 72,
-                      height: 72,
-                      background: "#1e2818",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <Icon size={28} color="#b8962e" strokeWidth={1.5} />
-                  </div>
-                  <h3
-                    style={{
-                      fontFamily: noto,
-                      fontWeight: 700,
-                      fontSize: "clamp(1rem, 1.8vw, 1.25rem)",
-                      color: "#1e2818",
-                      lineHeight: 1.5,
-                      textAlign: "start",
-                    }}
-                  >
-                    {l(sub.title)}
-                  </h3>
-                </div>
+          
+          {isSubServicesLoading ? (
+             <div style={{ padding: "4rem", textAlign: "center", color: "#b8962e" }}>جاري تحميل الخدمات الفرعية...</div>
+          ) : subServices.length === 0 ? (
+             <div style={{ padding: "4rem", textAlign: "center", color: "#999", fontFamily: ibm }}>لا توجد خدمات فرعية لهذه الفئة حالياً.</div>
+          ) : (
+            // 👈 التعديل هنا: الدوران حول subServices بدلاً من activeUnit.subs
+            subServices.map((sub: any, i: number) => {
+              // الداتابيز غالباً مبترجعش أيقونات للخدمات الفرعية، فبنديها أيقونة افتراضية أو عشوائية
+              const Icon = IconDocument; 
+              
+              // الـ API بيرجع description كنص عادي، مش كـ array من items.
+              // لو عايز تعرضه كبنود، ممكن نقسمه لو اليوزر كان بيكتب سطر جديد (Enter) في الداشبورد
+              const descriptionText = l(sub.description);
+              const items = descriptionText ? descriptionText.split('\n').filter((item: string) => item.trim() !== '') : [];
 
-                {/* Left: bullet list */}
-                <ul style={{ listStyle: "none", paddingInlineStart: 0, display: "flex", flexDirection: "column", gap: "0.85rem", margin: 0, paddingTop: "0.25rem" }}>
-                  {items.map((item, j) => (
-                    <li
-                      key={j}
+              return (
+                <div key={sub._id || i} className="svc-sub-row">
+                  {/* Right: icon + title */}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "1.25rem" }}>
+                    <div
                       style={{
-                        fontFamily: ibm,
-                        fontSize: "clamp(0.83rem, 1.1vw, 1rem)",
-                        color: "#3a3a32",
-                        lineHeight: 2,
-                        whiteSpace: "pre-line" // لضمان عرض فواصل الأسطر
+                        width: 72,
+                        height: 72,
+                        background: "#1e2818",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
                       }}
                     >
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
+                      <Icon size={28} color="#b8962e" strokeWidth={1.5} />
+                    </div>
+                    <h3
+                      style={{
+                        fontFamily: noto,
+                        fontWeight: 700,
+                        fontSize: "clamp(1rem, 1.8vw, 1.25rem)",
+                        color: "#1e2818",
+                        lineHeight: 1.5,
+                        textAlign: "start",
+                      }}
+                    >
+                      {l(sub.name)}
+                    </h3>
+                  </div>
+
+                  {/* Left: bullet list (أو فقرة نصية) */}
+                  <ul style={{ listStyle: "none", paddingInlineStart: 0, display: "flex", flexDirection: "column", gap: "0.85rem", margin: 0, paddingTop: "0.25rem" }}>
+                    {items.map((item: string, j: number) => (
+                      <li
+                        key={j}
+                        style={{
+                          fontFamily: ibm,
+                          fontSize: "clamp(0.83rem, 1.1vw, 1rem)",
+                          color: "#3a3a32",
+                          lineHeight: 2,
+                        }}
+                      >
+                        {/* ضفنا نقطة صغيرة عشان تبان كأنها قائمة */}
+                        • {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

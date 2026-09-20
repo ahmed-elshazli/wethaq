@@ -1,73 +1,43 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLangStore } from '@/store/useLangStore';
-import { getSettingsForLocationsApi } from '../api/locationsApi';
+import { getBranchesApi } from '../api/branchesClientApi';
 
 export const useLocations = () => {
   const lang = useLangStore((state) => state.lang);
 
   return useQuery({
-    queryKey: ['locations-page', lang],
+    queryKey: ['locations-client', lang],
     queryFn: async () => {
-      const settings = await getSettingsForLocationsApi(lang);
+      // 1. جلب الفروع الحقيقية من الداتابيز
+      const branchesResponse = await getBranchesApi(lang);
       
-      if (!settings) return [];
+      // 2. التحقق من شكل الاستجابة (API يرجع { data: [...] })
+      const branchesArray = branchesResponse?.data || branchesResponse || [];
 
-      // Helper لضمان توحيد شكل البيانات (سواء رجعت Object أو String)
-      const wrap = (val: any) => {
-        if (!val) return { ar: '', en: '' };
-        if (typeof val === 'string') return { ar: val, en: val };
-        return val;
-      };
-
-      const branches = [];
-      const email = settings.email || 'info@wethaqalhaq.com';
-      const mainPhone = settings.mainPhone || '';
-      const extraPhone = settings.extraPhone || mainPhone; // لو مفيش رقم إضافي، نستخدم الرئيسي
-
-      // 1. فرع الرياض
-      if (settings.riyadhAddress) {
-        const address = wrap(settings.riyadhAddress);
-        branches.push({
-          city: { ar: 'الرياض', en: 'Riyadh' },
-          label: { ar: 'الفرع الرئيسي', en: 'Main Branch' },
-          address: address,
-          email: email,
-          phone: mainPhone,
-          hours: { ar: 'الأحد - الخميس: 9:00 ص - 5:00 م', en: 'Sun - Thu: 9:00 AM - 5:00 PM' },
-          // بنولد رابط بحث في خرائط جوجل بناءً على العنوان المكتوب
-          mapLink: `https://maps.google.com/?q=${encodeURIComponent(address.ar || address.en)}`
-        });
+      if (!Array.isArray(branchesArray)) {
+        return [];
       }
 
-      // 2. فرع جدة
-      if (settings.jeddahAddress) {
-        const address = wrap(settings.jeddahAddress);
-        branches.push({
-          city: { ar: 'جدة', en: 'Jeddah' },
-          label: { ar: 'فرع المنطقة الغربية', en: 'Western Region Branch' },
-          address: address,
-          email: email,
-          phone: extraPhone,
-          hours: { ar: 'الأحد - الخميس: 9:00 ص - 5:00 م', en: 'Sun - Thu: 9:00 AM - 5:00 PM' },
-          mapLink: `https://maps.google.com/?q=${encodeURIComponent(address.ar || address.en)}`
-        });
-      }
+      // 3. ترتيب الفروع بناءً على حقل الـ order (تصاعدياً)
+      const sortedBranches = [...branchesArray].sort((a, b) => (a.order || 0) - (b.order || 0));
 
-      // 3. فرع الدمام
-      if (settings.dammamAddress) {
-        const address = wrap(settings.dammamAddress);
-        branches.push({
-          city: { ar: 'الدمام', en: 'Dammam' },
-          label: { ar: 'فرع المنطقة الشرقية', en: 'Eastern Region Branch' },
-          address: address,
-          email: email,
-          phone: extraPhone,
-          hours: { ar: 'الأحد - الخميس: 9:00 ص - 5:00 م', en: 'Sun - Thu: 9:00 AM - 5:00 PM' },
-          mapLink: `https://maps.google.com/?q=${encodeURIComponent(address.ar || address.en)}`
-        });
-      }
-
-      return branches;
+      // 4. إعادة صياغة البيانات لتطابق ما ينتظره مكون Locations.tsx
+      return sortedBranches.map((branch: any) => ({
+        _id: branch._id,
+        city: branch.name,                  // اسم الفرع جاي في حقل name
+        label: branch.branchType,           // نوع الفرع (مثلاً "الرئيسي") جاي في branchType
+        address: branch.address,            // العنوان
+        email: branch.email,                // البريد الإلكتروني
+        phone: branch.phone,                // رقم الهاتف
+        hours: branch.workingHours,         // ساعات العمل جاية في workingHours
+        mapLink: branch.mapUrl,             // رابط خرائط جوجل جاي في mapUrl
+        
+        // لاحظ: הـ API اللي بعته مفيش فيه حقل mapIframe. 
+        // فلو إنت عايز خريطة مضمنة (Iframe) لأول فرع زي ما موجود في Locations.tsx، 
+        // ممكن نعتمد على الـ mapUrl، بس Iframe جوجل مابس بيحتاج رابط مخصص (Embed URL).
+        // مؤقتاً هنسيبه فارغ لحد ما نشوف هتعمل إيه فيه.
+        mapIframe: '' 
+      }));
     },
     retry: 1
   });

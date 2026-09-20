@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLangStore } from '@/store/useLangStore';
 import { getServicesApi } from '../api/servicesApi';
+import api from '@/utils/axios';
 
 // 1. Hook لجلب قائمة الـ Tabs (عشان شريط التنقل)
 export const useServiceTabs = () => {
@@ -21,39 +22,39 @@ export const useServiceTabs = () => {
   });
 };
 
-// 2. Hook لجلب تفاصيل الخدمة الحالية (بالاعتماد على الـ slug)
+// 2. Hook لجلب تفاصيل الخدمة الحالية (الرئيسية فقط)
 export const useServiceDetail = (slug: string) => {
   const lang = useLangStore((state) => state.lang);
 
   return useQuery({
     queryKey: ['service-detail', slug, lang],
     queryFn: async () => {
+      // بنجيب كل الخدمات ونفلتر بالـ slug (ممكن يتغير لو الباك إند عمل Endpoint يجيب بالـ slug مباشرة)
       const servicesRes = await getServicesApi(lang);
-      
-      // بنفلتر المصفوفة عشان نلاقي الخدمة اللي الـ slug بتاعها مطابق
       const activeService = servicesRes.find((s: any) => s.slug === slug);
       
       if (!activeService) throw new Error("Service not found");
 
-      const wrap = (val: string | undefined) => (val ? { ar: val, en: val } : undefined);
-
-      // بنبني شكل (Shape) وهمي يحاكي הـ UI بتاعك عشان الصفحة متضربش
-      // הـ subs هنا هتحتوي على وصف الخدمة فقط كعنصر واحد
-      return {
-        slug: activeService.slug,
-        tab: wrap(activeService.name),
-        subs: [
-          {
-            iconName: "IconDocument", // أيقونة افتراضية
-            title: wrap(activeService.name),
-            items: {
-              ar: [activeService.description], // الوصف هيتعرض كعنصر في القائمة
-              en: [activeService.description]
-            }
-          }
-        ]
-      };
+      // بنرجع بيانات الخدمة الرئيسية بس (بدون اختراع subs وهمية)
+      return activeService; 
     },
-    retry: false // مش عايزين retry لو الـ slug غلط
+    retry: false 
+  });
+};
+
+// 3. 👈 Hook الجديد لجلب الخدمات الفرعية الخاصة بخدمة معينة بالـ ID
+export const useSubServices = (serviceId: string | undefined) => {
+  const lang = useLangStore((state) => state.lang);
+
+  return useQuery({
+    queryKey: ['sub-services-client', serviceId, lang],
+    queryFn: async () => {
+      // بننادي على أول Endpoint في الصورة اللي بيبدأ بـ /services/{serviceId}
+      const res = await api.get(`/api/v1/services/${serviceId}/sub-services`, {
+        headers: { 'Accept-Language': lang },
+      });
+      return res.data?.data || res.data;
+    },
+    enabled: !!serviceId, // مش هيشتغل إلا لما الـ useServiceDetail يخلص ويجيب الـ ID
   });
 };

@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import { useLangStore } from "@/store/useLangStore";
 import { useSiteSettings } from "@/features/settings/hooks/useSiteSettings";
 import { useServices } from "@/features/services/hooks/useServices";
+import { useLocations } from "@/features/locations/hooks/useLocations"; 
 import Logo from "@/components/Logo";
+import { IconPhone, IconMail, IconBuilding } from "@/components/Icons";
 
 const quickLinks = [
   { ar: "من نحن", en: "About Us", path: "/about" },
@@ -13,10 +15,21 @@ const quickLinks = [
 
 export default function Footer() {
   const { isAr } = useLangStore();
+  
+  // 1. الإعدادات (للهواتف، الإيميل، الواتساب)
   const { data: settingsRes } = useSiteSettings();
-  const { data: servicesList } = useServices();
+  const settings = settingsRes?.data || settingsRes || {};
 
-  const settings = settingsRes?.data || settingsRes;
+  // 2. الفروع (للعنوان الرئيسي)
+  const { data: locationsRes } = useLocations(); 
+  const locations = (locationsRes as any)?.data || locationsRes || [];
+  
+  // تحديد الفرع الرئيسي بناءً على أقل رقم في الـ order
+  const mainBranch = locations.length > 0 
+    ? [...locations].sort((a: any, b: any) => (a.order ?? 999) - (b.order ?? 999))[0]
+    : {};
+
+  const { data: servicesList } = useServices();
 
   const getText = (field: any): string => {
     if (!field) return '';
@@ -32,12 +45,19 @@ export default function Footer() {
   const cleanWhatsapp = rawWhatsapp.replace(/[^0-9]/g, '');
   const officeNameStr = getText(settings?.officeName) || (isAr ? "وثاق الحق" : "Wethaq Al-Haq");
 
+  // استخراج البيانات المطلوبة
+  const displayPhone = settings?.mainPhone || '';
+  const displayPhone2 = settings?.extraPhone || '';
+  const displayEmail = settings?.email || '';
+  const displayAddress = mainBranch.address || '';
+  const branchName = mainBranch.city || mainBranch.name || '';
+
   return (
     <footer style={{ background: "#111a11", borderTop: "1px solid rgba(184,150,46,0.2)", paddingTop: "4rem" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 1.5rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "3rem", paddingBottom: "3rem" }}>
           
-          {/* قسم اللوجو الموحد */}
+          {/* قسم اللوجو */}
           <div>
             <Logo size="md" withText={true} />
             <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
@@ -59,7 +79,7 @@ export default function Footer() {
                 servicesList.slice(0, 6).map((service: any) => (
                   <li key={service.slug || service._id || Math.random()}>
                     <Link to={`/services/${service.slug}`} style={{ color: "rgba(232,216,184,0.65)", fontSize: "0.8rem", textDecoration: "none", fontFamily: "'IBM Plex Sans Arabic', sans-serif", transition: "color 0.2s" }}>
-                      {getText(service.title)}
+                      {getText(service.name || service.title)}
                     </Link>
                   </li>
                 ))
@@ -90,32 +110,39 @@ export default function Footer() {
             <h4 style={{ color: "#b8962e", fontWeight: 600, fontSize: "0.85rem", marginBottom: "1.25rem", fontFamily: "'IBM Plex Sans Arabic', sans-serif" }}>
               {isAr ? "تواصل معنا" : "Contact Us"}
             </h4>
+            
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              {[
-                { title: isAr ? "الرياض:" : "Riyadh:", val: settings?.riyadhAddress },
-                { title: isAr ? "جدة:" : "Jeddah:", val: settings?.jeddahAddress },
-                { title: isAr ? "الدمام:" : "Dammam:", val: settings?.dammamAddress },
-              ].filter(b => b.val).map((branch, i) => (
-                <div key={i} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-                  <span style={{ fontSize: "0.85rem", marginTop: "0.1rem" }}>📍</span>
-                  <span style={{ color: "#c9a84c", fontSize: "0.78rem", fontWeight: 600, fontFamily: "'IBM Plex Sans Arabic', sans-serif", whiteSpace: "nowrap" }}>{branch.title}</span>
-                  <span style={{ color: "rgba(232,216,184,0.65)", fontSize: "0.78rem", lineHeight: 1.6, fontFamily: "'IBM Plex Sans Arabic', sans-serif" }}>{getText(branch.val)}</span>
+              
+              {/* عرض العنوان من الفرع الرئيسي */}
+              {displayAddress && (
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+                  <span style={{ fontSize: "0.85rem", marginTop: "0.1rem", color: "#b8962e" }}><IconBuilding size={16} /></span>
+                  <span style={{ color: "#c9a84c", fontSize: "0.78rem", fontWeight: 600, fontFamily: "'IBM Plex Sans Arabic', sans-serif", whiteSpace: "nowrap" }}>
+                    {branchName}:
+                  </span>
+                  <span style={{ color: "rgba(232,216,184,0.65)", fontSize: "0.78rem", lineHeight: 1.6, fontFamily: "'IBM Plex Sans Arabic', sans-serif" }}>
+                    {displayAddress}
+                  </span>
                 </div>
-              ))}
+              )}
+
               <div style={{ height: "1px", background: "rgba(184,150,46,0.15)", margin: "0.5rem 0" }} />
+              
+              {/* عرض الهواتف والإيميل من الـ Settings */}
               {[
-                { icon: "📞", text: settings?.mainPhone || "+966110000000" },
-                { icon: "📱", text: settings?.extraPhone },
-                { icon: "✉️", text: settings?.email || "info@wethaqalhaq.com" },
+                { icon: <IconPhone size={16} />, text: displayPhone },
+                { icon: <IconPhone size={16} />, text: displayPhone2 },
+                { icon: <IconMail size={16} />, text: displayEmail },
               ].filter(item => item.text).map(({ icon, text }, i) => (
                 <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.85rem" }}>{icon}</span>
-                  <span style={{ color: "rgba(232,216,184,0.65)", fontSize: "0.78rem", fontFamily: "'IBM Plex Sans Arabic', sans-serif", direction: icon === "✉️" ? "inherit" : "ltr" }}>
-                    {getText(text)}
+                  <span style={{ color: "#b8962e" }}>{icon}</span>
+                  <span style={{ color: "rgba(232,216,184,0.65)", fontSize: "0.78rem", fontFamily: "'IBM Plex Sans Arabic', sans-serif", direction: "ltr" }}>
+                    {text}
                   </span>
                 </div>
               ))}
             </div>
+
             {cleanWhatsapp && (
               <a href={`https://wa.me/${cleanWhatsapp}`} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ marginTop: "1.5rem", display: "inline-flex", fontSize: "0.8rem", padding: "0.6rem 1.25rem", textDecoration: "none", fontFamily: "'IBM Plex Sans Arabic', sans-serif" }}>
                 {isAr ? "واتساب" : "WhatsApp"}
